@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime;
-using PromoCodeFactory.Core.Domain;
 using PromoCodeFactory.Core.Domain.Administration;
 
 namespace PromoCodeFactory.Core.Domain.PromoCodeManagement
