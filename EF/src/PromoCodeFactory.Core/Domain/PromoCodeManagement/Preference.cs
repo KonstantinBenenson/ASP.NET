@@ -6,6 +6,9 @@ namespace PromoCodeFactory.Core.Domain.PromoCodeManagement
         : BaseEntity
     {
         public string Name { get; set; }
-        public List<Customer> Customers { get; set; }
+        
+        // Relations
+        public ICollection<CustomerPreference> CustomersPreferences { get; set; }
+        //public ICollection<Customer> Customers { get; set; }
     }
 }

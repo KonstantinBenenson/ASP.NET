@@ -19,6 +19,12 @@ namespace PromoCodeFactory.WebHost.Utils
         }
 
         private static CustomerShortResponse PopulateCustomerResponse(Customer customer) => 
-            new CustomerShortResponse { Id = customer.Id, FirstName = customer.FirstName, LastName = customer.LastName, Email = customer.Email };
+            new CustomerShortResponse 
+            { 
+                Id = customer.Id, 
+                FirstName = customer.FirstName, 
+                LastName = customer.LastName, 
+                Email = customer.Email 
+            };
     }
 }

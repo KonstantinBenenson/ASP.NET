@@ -5,19 +5,17 @@ using PromoCodeFactory.Core.Domain.Administration;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess.Data;
 using PromoCodeFactory.DataAccess.Repositories;
-using System.Threading.Tasks;
 
 namespace PromoCodeFactory.DataAccess
 {
     public static class DiExtensions
     {
-        public static async Task EnsureDeletedAndSeeded(this IServiceCollection services)
+        public static void EnsureDeletedAndMigrateCompleted(this IServiceCollection services)
         {
             using var scope = services.BuildServiceProvider().CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-            await db.Database.EnsureDeletedAsync();
-            await db.Database.MigrateAsync();
-            await DatabaseContext.Seed(services);
+            db.Database.EnsureDeletedAsync();
+            db.Database.MigrateAsync();
         }
 
         public static void AddRepositories(this IServiceCollection services)

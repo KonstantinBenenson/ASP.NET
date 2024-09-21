@@ -8,6 +8,9 @@ using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess;
 using PromoCodeFactory.DataAccess.Data;
 using PromoCodeFactory.DataAccess.Repositories;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace PromoCodeFactory.WebHost
 {
@@ -29,7 +32,7 @@ namespace PromoCodeFactory.WebHost
 
             services.AddDbContext<DatabaseContext>();
 
-            services.EnsureDeletedAndSeeded().GetAwaiter().GetResult();
+            services.EnsureDeletedAndMigrateCompleted();
 
             services.AddRepositories();
 
@@ -37,6 +40,12 @@ namespace PromoCodeFactory.WebHost
             {
                 options.Title = "PromoCode Factory API Doc";
                 options.Version = "1.0";
+            });
+
+            services.AddSwaggerGen(options =>
+            {
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
         }
 
