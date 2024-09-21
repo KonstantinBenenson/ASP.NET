@@ -1,6 +1,4 @@
-﻿using PromoCodeFactory.Core.Domain;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace PromoCodeFactory.Core.Domain.Administration
 {
@@ -13,7 +11,7 @@ namespace PromoCodeFactory.Core.Domain.Administration
         public string FullName => $"{FirstName} {LastName}";
 
         public string Email { get; set; }
-
+        public Guid RoleId { get; set; }
         public Role Role { get; set; }
 
         public int AppliedPromocodesCount { get; set; }

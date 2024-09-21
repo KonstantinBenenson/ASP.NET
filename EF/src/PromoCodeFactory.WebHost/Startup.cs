@@ -29,6 +29,8 @@ namespace PromoCodeFactory.WebHost
 
             services.AddDbContext<DatabaseContext>();
 
+            services.EnsureDeletedAndSeeded().GetAwaiter().GetResult();
+
             services.AddRepositories();
 
             services.AddOpenApiDocument(options =>
