@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Mapster;
+using Microsoft.AspNetCore.Mvc;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.WebHost.Models;
@@ -14,7 +15,7 @@ namespace PromoCodeFactory.WebHost.Controllers
     /// Клиенты
     /// </summary>
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/[controller]/[Action]")]
     public class CustomersController
         : ControllerBase
     {
@@ -26,31 +27,35 @@ namespace PromoCodeFactory.WebHost.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CustomerShortResponse>>> GetCustomersAsync()
+        public async Task<ActionResult<List<CustomerShortResponse>>> GetCustomers()
         {
             var customers = await _repo.GetAllAsync();
             return Ok(customers.Count() > 0 ? customers.ToCustomerShortResponseList() : default);
         }
 
         [HttpGet("{id}")]
-        public Task<ActionResult<CustomerResponse>> GetCustomerAsync(Guid id)
+        public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id)
         {
-            //TODO: Добавить получение клиента вместе с выданными ему промомкодами
-            throw new NotImplementedException();
+            var customer = await _repo.GetByIdAsync(id);
+            if (customer == null) { return BadRequest($"No {nameof(Customer)} was found"); }
+            return Ok(customer);
         }
 
         [HttpPost]
-        public Task<IActionResult> CreateCustomerAsync(CreateOrEditCustomerRequest request)
+        public async Task<IActionResult> CreateCustomer(CreateOrEditCustomerRequest request)
         {
-            //TODO: Добавить создание нового клиента вместе с его предпочтениями
-            throw new NotImplementedException();
+            var newCustomer = request.ToCustomer();
+            await _repo.CreateAsync(newCustomer);
+            var response = newCustomer.ToCustomerShortResponse();
+            return CreatedAtAction(nameof(GetCustomer), new { id = newCustomer.Id }, response);
         }
 
         [HttpPut("{id}")]
-        public Task<IActionResult> EditCustomersAsync(Guid id, CreateOrEditCustomerRequest request)
+        public async Task<IActionResult> EditCustomer(Guid id, CreateOrEditCustomerRequest request)
         {
+            var updateCustomer = request.Adapt<Customer>();
             //TODO: Обновить данные клиента вместе с его предпочтениями
-            throw new NotImplementedException();
+            return Ok(updateCustomer);
         }
 
         [HttpDelete]

@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,8 +9,10 @@ using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess;
 using PromoCodeFactory.DataAccess.Data;
 using PromoCodeFactory.DataAccess.Repositories;
+using PromoCodeFactory.WebHost.Models;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace PromoCodeFactory.WebHost
@@ -47,6 +50,12 @@ namespace PromoCodeFactory.WebHost
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
+
+            // Настройка маппинга
+            //TypeAdapterConfig<CreateOrEditCustomerRequest, Customer>.NewConfig()
+            //    .Map(dest => dest.CustomersPreferences,
+            //         src => src.PreferenceIds.Select(guid => new CustomerPreference { PreferenceId = guid })
+            //         .ToList());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

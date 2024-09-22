@@ -12,13 +12,13 @@ namespace PromoCodeFactory.WebHost.Utils
             List<CustomerShortResponse> csr = new();
             foreach (var customer in customers)
             {
-                csr.Add(PopulateCustomerResponse(customer));
+                csr.Add(customer.ToCustomerShortResponse());
             }
 
             return csr;
         }
 
-        private static CustomerShortResponse PopulateCustomerResponse(Customer customer) => 
+        public static CustomerShortResponse ToCustomerShortResponse(this Customer customer) => 
             new CustomerShortResponse 
             { 
                 Id = customer.Id, 
@@ -26,5 +26,28 @@ namespace PromoCodeFactory.WebHost.Utils
                 LastName = customer.LastName, 
                 Email = customer.Email 
             };
+
+        public static Customer ToCustomer(this CreateOrEditCustomerRequest request, Guid? id = null)
+        {
+            var customerId = id ?? Guid.NewGuid();
+            var customer = new Customer
+            {
+                Id = customerId,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Email = request.Email,
+                CustomersPreferences = request.PreferenceIds.Count > 0 ? new List<CustomerPreference>() : null
+            };
+
+            if (customer.CustomersPreferences is not null)
+            {
+                foreach (var guid in request.PreferenceIds)
+                {
+                    customer.CustomersPreferences.Add(new CustomerPreference { CustomerId = customerId, PreferenceId = guid });
+                }
+            }
+
+            return customer;
+        }
     }
 }
