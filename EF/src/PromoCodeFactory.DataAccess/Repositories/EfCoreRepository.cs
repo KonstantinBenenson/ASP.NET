@@ -5,6 +5,7 @@ using PromoCodeFactory.DataAccess.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PromoCodeFactory.DataAccess.Repositories
@@ -20,35 +21,35 @@ namespace PromoCodeFactory.DataAccess.Repositories
             _dbSet = _dbContext.Set<T>();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken token)
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.ToListAsync(token);
         }
 
-        public virtual async Task<T> GetByIdAsync(Guid id)
+        public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken token)
         {
-            return await _dbSet.FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbSet.FirstOrDefaultAsync(x => x.Id == id, token);
         }
 
-        public virtual async Task CreateAsync(T entity)
+        public virtual async Task CreateAsync(T entity, CancellationToken token)
         {
-            await _dbSet.AddAsync(entity);
-            await _dbContext.SaveChangesAsync();
+            await _dbSet.AddAsync(entity, token);
+            await _dbContext.SaveChangesAsync(token);
         }
 
-        public virtual async Task UpdateAsync(Guid id, T entity)
+        public virtual async Task UpdateAsync(Guid id, T entity, CancellationToken token)
         {
             var storedEntity = TryFindEntityOrThrow(id);
             _dbSet.Entry(storedEntity).CurrentValues.SetValues(entity);
             _dbSet.Entry(storedEntity).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(token);
         }
 
-        public virtual async Task DeleteByIdAsync(Guid id)
+        public virtual async Task DeleteByIdAsync(Guid id, CancellationToken token)
         {
             var storedEntity = TryFindEntityOrThrow(id);
             _dbSet.Entry(storedEntity).State = EntityState.Deleted;
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(token);
         }
 
         #region Utils

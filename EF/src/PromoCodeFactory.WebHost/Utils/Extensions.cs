@@ -2,29 +2,52 @@
 using PromoCodeFactory.WebHost.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PromoCodeFactory.WebHost.Utils
 {
     public static class Extensions
     {
-        public static List<CustomerShortResponse> ToCustomerShortResponseList(this IEnumerable<Customer> customers)
+        public static List<CustomerShortResponse> ToShortResponseList(this IEnumerable<Customer> customers)
         {
             List<CustomerShortResponse> csr = new();
             foreach (var customer in customers)
             {
-                csr.Add(customer.ToCustomerShortResponse());
+                csr.Add(customer.ToShortResponse());
             }
 
             return csr;
         }
 
-        public static CustomerShortResponse ToCustomerShortResponse(this Customer customer) => 
-            new CustomerShortResponse 
-            { 
-                Id = customer.Id, 
-                FirstName = customer.FirstName, 
-                LastName = customer.LastName, 
-                Email = customer.Email 
+        public static List<CustomerResponse> ToResponseList(this IEnumerable<Customer> customers)
+        {
+            List<CustomerResponse> csr = new();
+            foreach (var customer in customers)
+            {
+                csr.Add(customer.ToResponse());
+            }
+
+            return csr;
+        }
+
+        public static CustomerShortResponse ToShortResponse(this Customer customer) =>
+            new()
+            {
+                Id = customer.Id,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email
+            };
+
+        public static CustomerResponse ToResponse(this Customer customer) =>
+            new()
+            {
+                Id = customer.Id,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email,
+                Preferences = customer.CustomersPreferences.Select(x => new PreferenceResponse
+                { Id = x.PreferenceId, Name = x.Preference.Name }).ToList()
             };
 
         public static Customer ToCustomer(this CreateOrEditCustomerRequest request, Guid? id = null)
@@ -49,5 +72,13 @@ namespace PromoCodeFactory.WebHost.Utils
 
             return customer;
         }
+
+        public static IEnumerable<PreferenceResponse> ToResponseList(this IEnumerable<Preference> preferences) =>
+            preferences.Select(x =>
+                new PreferenceResponse()
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                }).ToList();
     }
 }

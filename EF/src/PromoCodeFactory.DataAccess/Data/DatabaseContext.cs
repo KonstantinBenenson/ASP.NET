@@ -15,7 +15,7 @@ namespace PromoCodeFactory.DataAccess.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Preference> Preferences { get; set; }
-        public DbSet<PromoCode> PromoCodes { get; set; }
+        public DbSet<PromoCode> PromoCodes { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

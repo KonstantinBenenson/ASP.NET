@@ -7,6 +7,7 @@ using PromoCodeFactory.WebHost.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PromoCodeFactory.WebHost.Controllers
@@ -26,43 +27,58 @@ namespace PromoCodeFactory.WebHost.Controllers
             _repo = repo;
         }
 
+        /// <summary>
+        /// Получить всех Клиентов.
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<List<CustomerShortResponse>>> GetCustomers()
+        public async Task<ActionResult<List<CustomerShortResponse>>> GetCustomers(CancellationToken cts)
         {
-            var customers = await _repo.GetAllAsync();
-            return Ok(customers.Count() > 0 ? customers.ToCustomerShortResponseList() : default);
+            var customers = await _repo.GetAllAsync(cts);
+            return Ok(customers.Count() > 0 ? customers.ToResponseList() : default);
         }
 
+        /// <summary>
+        /// Получить Клиента по id.
+        /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id)
+        public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id, CancellationToken cts)
         {
-            var customer = await _repo.GetByIdAsync(id);
+            var customer = await _repo.GetByIdAsync(id, cts);
             if (customer == null) { return BadRequest($"No {nameof(Customer)} was found"); }
             return Ok(customer);
         }
 
+        /// <summary>
+        /// Создать Клиента.
+        /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateCustomer(CreateOrEditCustomerRequest request)
+        public async Task<IActionResult> CreateCustomer(CreateOrEditCustomerRequest request, CancellationToken cts)
         {
             var newCustomer = request.ToCustomer();
-            await _repo.CreateAsync(newCustomer);
-            var response = newCustomer.ToCustomerShortResponse();
+            await _repo.CreateAsync(newCustomer, cts);
+            var response = newCustomer.ToResponse();
             return CreatedAtAction(nameof(GetCustomer), new { id = newCustomer.Id }, response);
         }
 
+        /// <summary>
+        /// Редактировать Клиента.
+        /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditCustomer(Guid id, CreateOrEditCustomerRequest request)
+        public async Task<IActionResult> EditCustomer(Guid id, CreateOrEditCustomerRequest request, CancellationToken cts)
         {
-            var updateCustomer = request.Adapt<Customer>();
-            //TODO: Обновить данные клиента вместе с его предпочтениями
-            return Ok(updateCustomer);
+            var updateCustomer = request.ToCustomer();
+            await _repo.UpdateAsync(id, updateCustomer, cts);
+            return NoContent();
         }
 
+        /// <summary>
+        /// Удалить Клиента.
+        /// </summary>
         [HttpDelete]
-        public Task<IActionResult> DeleteCustomer(Guid id)
+        public async Task<IActionResult> DeleteCustomer(Guid id, CancellationToken cts)
         {
-            //TODO: Удаление клиента вместе с выданными ему промокодами
-            throw new NotImplementedException();
+            await _repo.DeleteByIdAsync(id, cts);
+            return Ok();
         }
     }
 }

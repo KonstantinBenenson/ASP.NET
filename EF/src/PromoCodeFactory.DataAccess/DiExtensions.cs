@@ -21,10 +21,10 @@ namespace PromoCodeFactory.DataAccess
         public static void AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IRepository<Employee>, EfCoreRepository<Employee>>();
-            services.AddScoped<IRepository<Customer>, EfCoreRepository<Customer>>();
+            services.AddScoped<IRepository<Customer>, CustomersRepository>();
             services.AddScoped<IRepository<Role>, EfCoreRepository<Role>>();
             services.AddScoped<IRepository<Preference>, EfCoreRepository<Preference>>();
-            services.AddScoped<IRepository<PromoCode>, EfCoreRepository<PromoCode>>();
+            services.AddScoped<IRepository<PromoCode>, PromoCodeRepository>();
         }
     }
 }
