@@ -26,6 +26,7 @@ namespace PromoCodeFactory.DataAccess.Repositories
             return await _dbContext.Customers
                 .Include(c => c.CustomersPreferences)
                 .ThenInclude(cp => cp.Preference)
+                .Include(c => c.PromoCodes)
                 .ToListAsync(token);
         }
 
@@ -34,6 +35,7 @@ namespace PromoCodeFactory.DataAccess.Repositories
             return await _dbContext.Customers
                 .Include(c => c.CustomersPreferences)
                 .ThenInclude(cp => cp.Preference)
+                .Include(c => c.PromoCodes)
                 .FirstOrDefaultAsync(c => c.Id == id, token);
         }
         public override async Task CreateAsync(Customer entity, CancellationToken token)

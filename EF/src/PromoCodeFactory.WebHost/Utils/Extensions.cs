@@ -47,7 +47,8 @@ namespace PromoCodeFactory.WebHost.Utils
                 LastName = customer.LastName,
                 Email = customer.Email,
                 Preferences = customer.CustomersPreferences.Select(x => new PreferenceResponse
-                    { Id = x.PreferenceId, Name = x.Preference.Name }).ToList()
+                    { Id = x.PreferenceId, Name = x.Preference.Name }).ToList(),
+                PromoCodes = customer.PromoCodes is not null ? customer.PromoCodes.ToShortResponseList() : null
             };
 
         public static Customer ToCustomer(this CreateOrEditCustomerRequest request, Guid? id = null)
@@ -80,5 +81,16 @@ namespace PromoCodeFactory.WebHost.Utils
                     Id = x.Id,
                     Name = x.Name,
                 }).ToList();
+
+        public static List<PromoCodeShortResponse> ToShortResponseList(this IEnumerable<PromoCode> promoCodes) =>
+            promoCodes.Select(x => new PromoCodeShortResponse
+            {
+                Id = x.Id,
+                Code = x.Code,
+                ServiceInfo = x.ServiceInfo,
+                PartnerName = x.PartnerName,
+                BeginDate = x.BeginDate.ToShortDateString(),
+                EndDate = x.EndDate.ToShortDateString(),
+            }).ToList();
     }
 }

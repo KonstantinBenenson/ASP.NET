@@ -40,15 +40,16 @@ namespace PromoCodeFactory.DataAccess.Repositories
 
         public virtual async Task UpdateAsync(Guid id, T entity, CancellationToken token)
         {
-            var storedEntity = TryFindEntityOrThrow(id);
-            _dbSet.Entry(storedEntity).CurrentValues.SetValues(entity);
-            _dbSet.Entry(storedEntity).State = EntityState.Modified;
+            //var storedEntity = await TryFindEntityOrThrow(id, token);
+            _dbSet.Update(entity);
+            //_dbSet.Entry(storedEntity).CurrentValues.SetValues(entity);
+            //_dbSet.Entry(storedEntity).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync(token);
         }
 
         public virtual async Task DeleteByIdAsync(Guid id, CancellationToken token)
         {
-            var storedEntity = TryFindEntityOrThrow(id);
+            var storedEntity = await TryFindEntityOrThrow(id, token);
             _dbSet.Entry(storedEntity).State = EntityState.Deleted;
             await _dbContext.SaveChangesAsync(token);
         }
@@ -60,9 +61,9 @@ namespace PromoCodeFactory.DataAccess.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <exception cref="ArgumentException"></exception>
-        private T TryFindEntityOrThrow(Guid id)
+        private async Task<T> TryFindEntityOrThrow(Guid id, CancellationToken token)
         {
-            if (_dbSet.Where(e => e.Id == id) is not T storedEntity)
+            if (await _dbSet.Where(e => e.Id == id).FirstOrDefaultAsync(token) is not T storedEntity)
             {
                 throw new ArgumentException($"Entity {typeof(T)} not found", nameof(id));
             }

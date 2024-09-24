@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.WebHost.Models;
+using PromoCodeFactory.WebHost.Utils;
 
 namespace PromoCodeFactory.WebHost.Controllers
 {
@@ -33,38 +34,30 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<ActionResult<List<PromoCodeShortResponse>>> GetPromocodesAsync(CancellationToken token)
         {
             var promoCodes = await _repo.GetAllAsync(token);
-            var shortResponseList = promoCodes.Select(x => new PromoCodeShortResponse
-            {
-                Id = x.Id,
-                Code = x.Code,
-                ServiceInfo = x.ServiceInfo,
-                PartnerName = x.PartnerName,
-                BeginDate = x.BeginDate.ToShortDateString(),
-                EndDate = x.EndDate.ToShortDateString(),
-            }).ToList();
-
-            return Ok(shortResponseList);
+            return Ok(promoCodes.ToShortResponseList());
         }
 
         /// <summary>
-        /// Создать промокод и выдать его клиентам с указанным предпочтением
+        /// Создать промокод и выдать его определенному клиенту.
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> GivePromoCodesToCustomersWithPreferenceAsync(GivePromoCodeRequest request, CancellationToken token)
+        public async Task<IActionResult> GivePromoCodesToCustomersWithPreferenceAsync(Guid id, GivePromoCodeRequest request, CancellationToken token)
         {
-            var promo = new PromoCode 
-            { 
+            var promo = new PromoCode
+            {
                 Id = Guid.NewGuid(),
                 Code = request.PromoCode,
                 BeginDate = DateTime.UtcNow,
                 ServiceInfo = request.ServiceInfo,
+                PartnerManagerId = Guid.NewGuid(),
                 PartnerName = request.PartnerName,
-                Preference = new Preference { Name = request.Preference }
+                Preference = new Preference { Name = request.Preference },
+                CustomerId = id,
             };
 
             await _repo.CreateAsync(promo, token);
-            return Ok(promo);
+            return Ok();
         }
     }
 }

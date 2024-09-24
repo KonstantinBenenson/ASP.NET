@@ -45,7 +45,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         {
             var customer = await _repo.GetByIdAsync(id, cts);
             if (customer == null) { return BadRequest($"No {nameof(Customer)} was found"); }
-            return Ok(customer);
+            return Ok(customer.ToResponse());
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> EditCustomer(Guid id, CreateOrEditCustomerRequest request, CancellationToken cts)
         {
-            var updateCustomer = request.ToCustomer();
+            var updateCustomer = request.ToCustomer(id);
             await _repo.UpdateAsync(id, updateCustomer, cts);
             return NoContent();
         }
