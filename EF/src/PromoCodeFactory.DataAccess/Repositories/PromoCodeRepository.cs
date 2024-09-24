@@ -74,8 +74,9 @@ namespace PromoCodeFactory.DataAccess.Repositories
         public override async Task CreateAsync(PromoCode promoCode, CancellationToken token)
         {
             var preferenceId = await _dbContext.Preferences.Where(p => p.Name == promoCode.Preference.Name).Select(p => p.Id).SingleOrDefaultAsync(token);
-            promoCode.Preference = null;
+            var employeeId = await _dbContext.Employees.Where(e => e.FirstName == promoCode.PartnerName).Select(p => p.Id).SingleOrDefaultAsync(token);
             promoCode.PreferenceId = preferenceId;
+            promoCode.PartnerManagerId = employeeId;
             await _dbContext.PromoCodes.AddAsync(promoCode, token);
             await _dbContext.SaveChangesAsync(token);
         }

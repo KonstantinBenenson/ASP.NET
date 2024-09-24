@@ -50,7 +50,6 @@ namespace PromoCodeFactory.WebHost.Controllers
                 Code = request.PromoCode,
                 BeginDate = DateTime.UtcNow,
                 ServiceInfo = request.ServiceInfo,
-                PartnerManagerId = Guid.NewGuid(),
                 PartnerName = request.PartnerName,
                 Preference = new Preference { Name = request.Preference },
                 CustomerId = id,
