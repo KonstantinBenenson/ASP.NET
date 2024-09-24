@@ -60,7 +60,6 @@ namespace PromoCodeFactory.DataAccess.Repositories
                 await _dbContext.SaveChangesAsync(token);
             }
 
-            // TODO: here we actually make double check if the provided Id actually belongs to a Customer... 
             await base.DeleteByIdAsync(id, token);
         }
     }
