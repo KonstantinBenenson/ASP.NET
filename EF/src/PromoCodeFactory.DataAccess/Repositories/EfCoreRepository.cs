@@ -35,6 +35,7 @@ namespace PromoCodeFactory.DataAccess.Repositories
         {
             await _dbSet.AddAsync(entity, token);
             await _dbContext.SaveChangesAsync(token);
+            entity = await _dbSet.FirstOrDefaultAsync(e => e.Id == entity.Id, token);
         }
 
         public virtual async Task UpdateAsync(Guid id, T entity, CancellationToken token)

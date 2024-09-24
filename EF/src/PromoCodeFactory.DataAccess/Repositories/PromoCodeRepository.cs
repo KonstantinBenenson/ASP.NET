@@ -5,6 +5,7 @@ using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess.Data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,23 +32,32 @@ namespace PromoCodeFactory.DataAccess.Repositories
                     .Include(c => c.CustomersPreferences)
                     .ThenInclude(cp => cp.Preference);
 
+                var promoCodeBatch = new List<PromoCode>();
+
                 foreach (var customer in customersToAddPromoCodes)
                 {
-                    if (customer.PromoCodes is null)
-                        customer.PromoCodes = new List<PromoCode>();
+                    //if (customer.PromoCodes is null)
+                    //    customer.PromoCodes = new List<PromoCode>();
                     promoCode.CustomerId = customer.Id;
                     
                     if (promoCode.PreferenceId == Guid.Empty)
                         promoCode.PreferenceId = customer.CustomersPreferences
                             .Where(cp => cp.Preference.Name == promoCode.Preference.Name).FirstOrDefault().PreferenceId;
+                    if (promoCode.PartnerManagerId == Guid.Empty)
+                        promoCode.PartnerManagerId = await _dbContext.Employees.Select(e => e.Id).FirstOrDefaultAsync(token);
+                    
+                    // Add to batch
+                    promoCodeBatch.Add(promoCode);
 
-                    customer.PromoCodes.Add(promoCode);
+                    //customer.PromoCodes.Add(promoCode);
                 }
                 try
                 {
-                    _dbContext.Customers.UpdateRange(customersToAddPromoCodes);
-                    //await _dbContext.PromoCodes.AddAsync(promoCode, token);
+                    await _dbContext.PromoCodes.AddRangeAsync(promoCodeBatch, token);
+                    //_dbContext.Customers.UpdateRange(customersToAddPromoCodes);
                     await _dbContext.SaveChangesAsync(token);
+
+                    var result = await customersToAddPromoCodes.Include(c => c.PromoCodes).FirstOrDefaultAsync(token);
                 }
                 catch (DbUpdateException ex)
                 {

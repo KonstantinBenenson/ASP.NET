@@ -47,7 +47,7 @@ namespace PromoCodeFactory.WebHost.Utils
                 LastName = customer.LastName,
                 Email = customer.Email,
                 Preferences = customer.CustomersPreferences.Select(x => new PreferenceResponse
-                { Id = x.PreferenceId, Name = x.Preference.Name }).ToList()
+                    { Id = x.PreferenceId, Name = x.Preference.Name }).ToList()
             };
 
         public static Customer ToCustomer(this CreateOrEditCustomerRequest request, Guid? id = null)

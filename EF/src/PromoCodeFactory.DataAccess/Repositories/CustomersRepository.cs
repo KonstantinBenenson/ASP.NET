@@ -36,6 +36,18 @@ namespace PromoCodeFactory.DataAccess.Repositories
                 .ThenInclude(cp => cp.Preference)
                 .FirstOrDefaultAsync(c => c.Id == id, token);
         }
+        public override async Task CreateAsync(Customer entity, CancellationToken token)
+        {
+            await _dbContext.Customers.AddAsync(entity, token);
+            await _dbContext.SaveChangesAsync(token);
+
+            foreach (var customerPreference in entity.CustomersPreferences) { 
+                var preferenceName = await _dbContext.Preferences.Where(p => p.Id == customerPreference.PreferenceId).Select(p => p.Name).SingleOrDefaultAsync(token);
+                customerPreference.Preference = new() { Name = preferenceName };
+            }
+
+            entity = await _dbContext.Customers.Include(c => c.CustomersPreferences).FirstOrDefaultAsync(e => e.Id == entity.Id, token);
+        }
 
         public override async Task DeleteByIdAsync(Guid id, CancellationToken token)
         {

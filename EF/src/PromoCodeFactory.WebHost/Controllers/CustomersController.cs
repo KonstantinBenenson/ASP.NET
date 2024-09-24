@@ -56,8 +56,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         {
             var newCustomer = request.ToCustomer();
             await _repo.CreateAsync(newCustomer, cts);
-            var response = newCustomer.ToResponse();
-            return CreatedAtAction(nameof(GetCustomer), new { id = newCustomer.Id }, response);
+            return CreatedAtAction(nameof(GetCustomer), new { id = newCustomer.Id }, newCustomer.ToResponse());
         }
 
         /// <summary>
