@@ -1,5 +1,4 @@
-﻿using Mapster;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.WebHost.Models;
@@ -34,7 +33,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<ActionResult<List<CustomerShortResponse>>> GetCustomers(CancellationToken cts)
         {
             var customers = await _repo.GetAllAsync(cts);
-            return Ok(customers.Count() > 0 ? customers.ToResponseList() : default);
+            return Ok(customers.Count() > 0 ? customers.ToResponseList() : []);
         }
 
         /// <summary>
@@ -44,7 +43,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id, CancellationToken cts)
         {
             var customer = await _repo.GetByIdAsync(id, cts);
-            if (customer == null) { return BadRequest($"No {nameof(Customer)} was found"); }
+            if (customer == null) { return NoContent(); }
             return Ok(customer.ToResponse());
         }
 
@@ -77,7 +76,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<IActionResult> DeleteCustomer(Guid id, CancellationToken cts)
         {
             await _repo.DeleteByIdAsync(id, cts);
-            return Ok();
+            return NoContent();
         }
     }
 }

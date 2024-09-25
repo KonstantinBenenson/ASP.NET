@@ -23,27 +23,25 @@ namespace PromoCodeFactory.DataAccess.Repositories
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken token)
         {
-            return await _dbSet.ToListAsync(token);
+            // we use AsNoTrackingWithIdentityResolution because potentially we might return references to different instances of the same Entity
+            // (f.e. a Customer can be referenced inside of multiple Promocodes)
+            return await _dbSet.AsNoTrackingWithIdentityResolution().ToListAsync(token);
         }
 
         public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken token)
         {
-            return await _dbSet.FirstOrDefaultAsync(x => x.Id == id, token);
+            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
         }
 
         public virtual async Task CreateAsync(T entity, CancellationToken token)
         {
             await _dbSet.AddAsync(entity, token);
             await _dbContext.SaveChangesAsync(token);
-            entity = await _dbSet.FirstOrDefaultAsync(e => e.Id == entity.Id, token);
         }
 
         public virtual async Task UpdateAsync(Guid id, T entity, CancellationToken token)
         {
-            //var storedEntity = await TryFindEntityOrThrow(id, token);
             _dbSet.Update(entity);
-            //_dbSet.Entry(storedEntity).CurrentValues.SetValues(entity);
-            //_dbSet.Entry(storedEntity).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync(token);
         }
 
@@ -59,8 +57,6 @@ namespace PromoCodeFactory.DataAccess.Repositories
         /// <summary>
         /// Tries to find an Entity with the provided Key. Otherwise throws the ArgumentException.
         /// </summary>
-        /// <param name="id"></param>
-        /// <exception cref="ArgumentException"></exception>
         private async Task<T> TryFindEntityOrThrow(Guid id, CancellationToken token)
         {
             if (await _dbSet.Where(e => e.Id == id).FirstOrDefaultAsync(token) is not T storedEntity)

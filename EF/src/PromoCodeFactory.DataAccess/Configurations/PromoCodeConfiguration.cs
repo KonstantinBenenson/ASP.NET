@@ -8,9 +8,11 @@ namespace PromoCodeFactory.DataAccess.Configurations
     {
         public void Configure(EntityTypeBuilder<PromoCode> builder)
         {
-            builder.Property(x => x.PartnerName).HasMaxLength(25);
-            builder.Property(x => x.ServiceInfo).HasMaxLength(250);
-            builder.HasIndex(x => x.CustomerId);
+            builder.Property(x => x.Code).HasMaxLength(8).IsRequired();
+            builder.Property(x => x.PartnerManagerId).IsRequired();
+            builder.Property(x => x.PartnerName).HasMaxLength(25).IsRequired();
+            builder.Property(x => x.PreferenceId).IsRequired();
+            builder.Property(x => x.ServiceInfo).HasMaxLength(250).IsRequired();
 
             builder.HasOne(p => p.Customer).WithMany(c => c.PromoCodes).HasForeignKey(p => p.CustomerId);
         }

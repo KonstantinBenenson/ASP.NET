@@ -51,6 +51,10 @@ namespace PromoCodeFactory.WebHost.Utils
                 PromoCodes = customer.PromoCodes is not null ? customer.PromoCodes.ToShortResponseList() : null
             };
 
+        /// <summary>
+        /// <paramref name="id"/> has to be provided if the mapping is being done with the already existing Entity.
+        /// </summary>
+        /// <returns><seealso cref="Customer"/></returns>
         public static Customer ToCustomer(this CreateOrEditCustomerRequest request, Guid? id = null)
         {
             var customerId = id ?? Guid.NewGuid();
