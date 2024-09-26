@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PromoCodeFactory.DataAccess;
 using PromoCodeFactory.DataAccess.Data;
 using PromoCodeFactory.WebHost.Configs;
 using System;
@@ -30,8 +29,6 @@ namespace PromoCodeFactory.WebHost
             services.AddControllers();
 
             services.AddDbContext<DatabaseContext>();
-
-            services.EnsureDeletedAndMigrateCompleted();
 
             services.AddRepositories();
 

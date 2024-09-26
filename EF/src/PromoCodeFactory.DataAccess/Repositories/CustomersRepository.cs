@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess.Data;
 using System;
@@ -14,11 +15,13 @@ namespace PromoCodeFactory.DataAccess.Repositories
     /// </summary>
     public class CustomersRepository : EfCoreRepository<Customer>
     {
+        private readonly ILogger<Customer> _logger;
         private readonly DatabaseContext _dbContext;
 
-        public CustomersRepository(DatabaseContext dbContext) : base(dbContext)
+        public CustomersRepository(DatabaseContext dbContext, ILogger<Customer> logger) : base(dbContext, logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public override async Task<IEnumerable<Customer>> GetAllAsync(CancellationToken token)
@@ -38,13 +41,22 @@ namespace PromoCodeFactory.DataAccess.Repositories
                 .Include(c => c.PromoCodes)
                 .FirstOrDefaultAsync(c => c.Id == id, token);
         }
+
+        public override async Task<Customer> GetByNameAsync(string name, CancellationToken token)
+        {
+            return await _dbContext.Customers.FirstOrDefaultAsync(e => e.FirstName == name, token);
+        }
+
         public override async Task CreateAsync(Customer entity, CancellationToken token)
         {
             await _dbContext.Customers.AddAsync(entity, token);
             await _dbContext.SaveChangesAsync(token);
 
-            foreach (var customerPreference in entity.CustomersPreferences) { 
-                var preferenceName = await _dbContext.Preferences.Where(p => p.Id == customerPreference.PreferenceId).Select(p => p.Name).SingleOrDefaultAsync(token);
+            foreach (var customerPreference in entity.CustomersPreferences)
+            {
+                var preferenceName = await _dbContext.Preferences.Where(p => p.Id == customerPreference.PreferenceId)
+                    .Select(p => p.Name).SingleOrDefaultAsync(token);
+
                 customerPreference.Preference = new() { Name = preferenceName };
             }
 

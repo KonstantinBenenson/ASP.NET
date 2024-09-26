@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain;
 using PromoCodeFactory.DataAccess.Data;
@@ -14,11 +15,13 @@ namespace PromoCodeFactory.DataAccess.Repositories
     {
         private readonly DatabaseContext _dbContext;
         private readonly DbSet<T> _dbSet;
+        private ILogger<T> _logger;
 
-        public EfCoreRepository(DatabaseContext dbContext)
+        public EfCoreRepository(DatabaseContext dbContext, ILogger<T> logger)
         {
             _dbContext = dbContext;
             _dbSet = _dbContext.Set<T>();
+            _logger = logger;
         }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken token)
@@ -31,6 +34,12 @@ namespace PromoCodeFactory.DataAccess.Repositories
         public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken token)
         {
             return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
+        }
+
+        public virtual Task<T> GetByNameAsync(string name, CancellationToken token)
+        {
+            // since the BaseEntity doesn`t provide the name, we need to implement this method in child classes
+            throw new NotImplementedException();
         }
 
         public virtual async Task CreateAsync(T entity, CancellationToken token)
@@ -47,7 +56,9 @@ namespace PromoCodeFactory.DataAccess.Repositories
 
         public virtual async Task DeleteByIdAsync(Guid id, CancellationToken token)
         {
-            var storedEntity = await TryFindEntityOrThrow(id, token);
+            var storedEntity = await TryFindEntity(id, token);
+            if (storedEntity is null) return;
+
             _dbSet.Entry(storedEntity).State = EntityState.Deleted;
             await _dbContext.SaveChangesAsync(token);
         }
@@ -57,11 +68,12 @@ namespace PromoCodeFactory.DataAccess.Repositories
         /// <summary>
         /// Tries to find an Entity with the provided Key. Otherwise throws the ArgumentException.
         /// </summary>
-        private async Task<T> TryFindEntityOrThrow(Guid id, CancellationToken token)
+        private async Task<T> TryFindEntity(Guid id, CancellationToken token)
         {
             if (await _dbSet.Where(e => e.Id == id).FirstOrDefaultAsync(token) is not T storedEntity)
             {
-                throw new ArgumentException($"Entity {typeof(T)} not found", nameof(id));
+                _logger.LogWarning($"Entity {typeof(T)} not found", nameof(id));
+                return null;
             }
             return storedEntity;
         }

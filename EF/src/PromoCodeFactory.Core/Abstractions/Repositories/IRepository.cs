@@ -11,6 +11,7 @@ namespace PromoCodeFactory.Core.Abstractions.Repositories
     {
         Task<IEnumerable<T>> GetAllAsync(CancellationToken token);
         Task<T> GetByIdAsync(Guid id, CancellationToken token);
+        Task<T> GetByNameAsync(string name, CancellationToken token);
         Task CreateAsync(T entity, CancellationToken token);
         Task UpdateAsync(Guid id, T entity, CancellationToken token);
         Task DeleteByIdAsync(Guid id, CancellationToken token);
