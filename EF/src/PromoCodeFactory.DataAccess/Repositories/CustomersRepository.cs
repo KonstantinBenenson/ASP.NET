@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess.Data;
 using System;
@@ -13,12 +14,12 @@ namespace PromoCodeFactory.DataAccess.Repositories
     /// <summary>
     /// This implementation was created in order to add the Include method to the queries.
     /// </summary>
-    public class CustomersRepository : EfCoreRepository<Customer>
+    public class CustomersRepository : EfCoreRepository<Customer>, IExtendedRepository<Customer>
     {
-        private readonly ILogger<Customer> _logger;
+        private readonly ILogger<CustomersRepository> _logger;
         private readonly DatabaseContext _dbContext;
 
-        public CustomersRepository(DatabaseContext dbContext, ILogger<Customer> logger) : base(dbContext, logger)
+        public CustomersRepository(DatabaseContext dbContext, ILogger<CustomersRepository> logger) : base(dbContext, logger)
         {
             _dbContext = dbContext;
             _logger = logger;
@@ -42,7 +43,7 @@ namespace PromoCodeFactory.DataAccess.Repositories
                 .FirstOrDefaultAsync(c => c.Id == id, token);
         }
 
-        public override async Task<Customer> GetByNameAsync(string name, CancellationToken token)
+        public async Task<Customer> GetByNameAsync(string name, CancellationToken token)
         {
             return await _dbContext.Customers.FirstOrDefaultAsync(e => e.FirstName == name, token);
         }
@@ -51,28 +52,18 @@ namespace PromoCodeFactory.DataAccess.Repositories
         {
             await _dbContext.Customers.AddAsync(entity, token);
             await _dbContext.SaveChangesAsync(token);
-
-            foreach (var customerPreference in entity.CustomersPreferences)
-            {
-                var preferenceName = await _dbContext.Preferences.Where(p => p.Id == customerPreference.PreferenceId)
-                    .Select(p => p.Name).SingleOrDefaultAsync(token);
-
-                customerPreference.Preference = new() { Name = preferenceName };
-            }
-
-            entity = await _dbContext.Customers.Include(c => c.CustomersPreferences).FirstOrDefaultAsync(e => e.Id == entity.Id, token);
         }
 
-        public override async Task DeleteByIdAsync(Guid id, CancellationToken token)
-        {
-            // Remove all related PromoCodes
-            if (_dbContext.PromoCodes.Where(p => p.CustomerId == id) is IQueryable<PromoCode> promoCodesToDelete)
-            {
-                _dbContext.PromoCodes.RemoveRange(promoCodesToDelete);
-                await _dbContext.SaveChangesAsync(token);
-            }
+        //public override async Task DeleteByIdAsync(Guid id, CancellationToken token)
+        //{
+        //    // Remove all related PromoCodes
+        //    if (_dbContext.PromoCodes.Where(p => p.CustomerId == id) is IQueryable<PromoCode> promoCodesToDelete)
+        //    {
+        //        _dbContext.PromoCodes.RemoveRange(promoCodesToDelete);
+        //        await _dbContext.SaveChangesAsync(token);
+        //    }
 
-            await base.DeleteByIdAsync(id, token);
-        }
+        //    await base.DeleteByIdAsync(id, token);
+        //}
     }
 }

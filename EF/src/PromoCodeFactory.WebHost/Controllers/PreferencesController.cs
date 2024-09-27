@@ -17,9 +17,9 @@ namespace PromoCodeFactory.WebHost.Controllers
     public class PreferencesController
         : ControllerBase
     {
-        private readonly IRepository<Preference> _repo;
+        private readonly IExtendedRepository<Preference> _repo;
 
-        public PreferencesController(IRepository<Preference> repo)
+        public PreferencesController(IExtendedRepository<Preference> repo)
         {
             _repo = repo;
         }

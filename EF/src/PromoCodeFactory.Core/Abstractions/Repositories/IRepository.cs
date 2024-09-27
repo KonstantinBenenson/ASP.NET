@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using PromoCodeFactory.Core.Domain;
@@ -10,8 +11,8 @@ namespace PromoCodeFactory.Core.Abstractions.Repositories
         where T : BaseEntity
     {
         Task<IEnumerable<T>> GetAllAsync(CancellationToken token);
-        Task<T> GetByIdAsync(Guid id, CancellationToken token);
-        Task<T> GetByNameAsync(string name, CancellationToken token);
+        Task<T> GetByIdAsync(Guid id, CancellationToken token); 
+        Task<List<T>> GetByFilterAsync(Expression<Func<T, bool>> expression, CancellationToken token);
         Task CreateAsync(T entity, CancellationToken token);
         Task UpdateAsync(Guid id, T entity, CancellationToken token);
         Task DeleteByIdAsync(Guid id, CancellationToken token);

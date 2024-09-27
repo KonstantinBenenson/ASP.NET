@@ -6,6 +6,7 @@ using PromoCodeFactory.DataAccess.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,9 +16,9 @@ namespace PromoCodeFactory.DataAccess.Repositories
     {
         private readonly DatabaseContext _dbContext;
         private readonly DbSet<T> _dbSet;
-        private ILogger<T> _logger;
+        private ILogger<EfCoreRepository<T>> _logger;
 
-        public EfCoreRepository(DatabaseContext dbContext, ILogger<T> logger)
+        public EfCoreRepository(DatabaseContext dbContext, ILogger<EfCoreRepository<T>> logger)
         {
             _dbContext = dbContext;
             _dbSet = _dbContext.Set<T>();
@@ -34,12 +35,6 @@ namespace PromoCodeFactory.DataAccess.Repositories
         public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken token)
         {
             return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
-        }
-
-        public virtual Task<T> GetByNameAsync(string name, CancellationToken token)
-        {
-            // since the BaseEntity doesn`t provide the name, we need to implement this method in child classes
-            throw new NotImplementedException();
         }
 
         public virtual async Task CreateAsync(T entity, CancellationToken token)
@@ -76,6 +71,11 @@ namespace PromoCodeFactory.DataAccess.Repositories
                 return null;
             }
             return storedEntity;
+        }
+
+        public async Task<List<T>> GetByFilterAsync(Expression<Func<T, bool>> expression, CancellationToken token)
+        {
+            return await _dbSet.Where(expression).ToListAsync(token);
         }
 
         #endregion

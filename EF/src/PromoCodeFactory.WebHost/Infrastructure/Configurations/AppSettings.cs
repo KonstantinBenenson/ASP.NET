@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PromoCodeFactory.WebHost.Configs
+namespace PromoCodeFactory.WebHost.Configurations
 {
     public class AppSettings
     {

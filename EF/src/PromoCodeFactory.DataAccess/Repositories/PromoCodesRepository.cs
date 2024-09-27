@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess.Data;
 using System.Threading;
@@ -9,9 +10,9 @@ namespace PromoCodeFactory.DataAccess.Repositories
     public class PromoCodesRepository : EfCoreRepository<PromoCode>
     {
         private readonly DatabaseContext _dbContext;
-        private readonly ILogger<PromoCode> _logger;
+        private readonly ILogger<PromoCodesRepository> _logger;
 
-        public PromoCodesRepository(DatabaseContext dbContext, ILogger<PromoCode> logger) : base(dbContext, logger)
+        public PromoCodesRepository(DatabaseContext dbContext, ILogger<PromoCodesRepository> logger) : base(dbContext, logger)
         {
             _dbContext = dbContext;
             _logger = logger;

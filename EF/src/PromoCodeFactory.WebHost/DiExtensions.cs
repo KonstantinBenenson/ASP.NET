@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.Administration;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
+using PromoCodeFactory.Core.Enums;
 using PromoCodeFactory.DataAccess.Data;
 using PromoCodeFactory.DataAccess.Repositories;
+using PromoCodeFactory.WebHost.Configurations;
 using System;
 using System.Threading.Tasks;
 
@@ -35,11 +37,22 @@ namespace PromoCodeFactory.WebHost
 
         public static void AddRepositories(this IServiceCollection services)
         {
-            services.AddScoped<IRepository<Employee>, EmployeeRepository>();
-            services.AddScoped<IRepository<Customer>, CustomersRepository>();
+            services.AddScoped<IExtendedRepository<Employee>, EmployeeRepository>();
+            services.AddScoped<IExtendedRepository<Customer>, CustomersRepository>();
             services.AddScoped<IRepository<Role>, EfCoreRepository<Role>>();
-            services.AddScoped<IRepository<Preference>, PreferencesRepository>();
+            services.AddScoped<IExtendedRepository<Preference>, PreferencesRepository>();
             services.AddScoped<IRepository<PromoCode>, PromoCodesRepository>();
+        }
+
+        public static void AddDbContextConfigured<T>(this IServiceCollection services, DatabaseProviders provider) where T : DbContext
+        {
+            using var serviceProvider = services.BuildServiceProvider();
+            var appSettings = serviceProvider.GetService<IOptions<AppSettings>>()!.Value;
+
+            services.AddDbContext<T>(options =>
+            {
+                options.UseSqlite(appSettings.ConnectionStrings[provider.ToString()]);
+            });
         }
     }
 }

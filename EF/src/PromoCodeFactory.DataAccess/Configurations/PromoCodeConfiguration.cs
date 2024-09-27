@@ -14,7 +14,7 @@ namespace PromoCodeFactory.DataAccess.Configurations
             builder.Property(x => x.PreferenceId).IsRequired();
             builder.Property(x => x.ServiceInfo).HasMaxLength(250).IsRequired();
 
-            builder.HasOne(p => p.Customer).WithMany(c => c.PromoCodes).HasForeignKey(p => p.CustomerId);
+            //builder.HasOne(p => p.Customer).WithMany(c => c.PromoCodes).HasForeignKey(p => p.CustomerId);
         }
     }
 }

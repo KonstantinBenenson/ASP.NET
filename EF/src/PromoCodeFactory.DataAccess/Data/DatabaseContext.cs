@@ -1,9 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using PromoCodeFactory.Core.Domain.Administration;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
-using PromoCodeFactory.Core.Enums;
-using PromoCodeFactory.WebHost.Configs;
 using System.Reflection;
 
 namespace PromoCodeFactory.DataAccess.Data
@@ -16,11 +13,8 @@ namespace PromoCodeFactory.DataAccess.Data
         public DbSet<Preference> Preferences { get; set; }
         public DbSet<PromoCode> PromoCodes { get; set; }
 
-        private readonly AppSettings _appSettings;
-
-        public DatabaseContext(DbContextOptions<DatabaseContext> options, IOptions<AppSettings> appSettings) : base(options)
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
-            _appSettings = appSettings.Value;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,7 +24,6 @@ namespace PromoCodeFactory.DataAccess.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(_appSettings.ConnectionStrings[nameof(DatabaseProviders.SQLite)]);
             optionsBuilder.LogTo(System.Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
         }
     }

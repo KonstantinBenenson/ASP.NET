@@ -18,9 +18,9 @@ namespace PromoCodeFactory.WebHost.Controllers
     public class EmployeesController
         : ControllerBase
     {
-        private readonly IRepository<Employee> _employeeRepository;
+        private readonly IExtendedRepository<Employee> _employeeRepository;
 
-        public EmployeesController(IRepository<Employee> employeeRepository)
+        public EmployeesController(IExtendedRepository<Employee> employeeRepository)
         {
             _employeeRepository = employeeRepository;
         }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.WebHost.Models;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using YamlDotNet.Core.Tokens;
 
 namespace PromoCodeFactory.WebHost.Controllers
 {
@@ -19,20 +21,22 @@ namespace PromoCodeFactory.WebHost.Controllers
     public class CustomersController
         : ControllerBase
     {
-        private readonly IRepository<Customer> _repo;
+        private readonly IExtendedRepository<Customer> _customerRepo;
+        private readonly IExtendedRepository<Preference> _preferenceRepo;
 
-        public CustomersController(IRepository<Customer> repo)
+        public CustomersController(IExtendedRepository<Customer> customerRepo, IExtendedRepository<Preference> preferenceRepo)
         {
-            _repo = repo;
+            _customerRepo = customerRepo;
+            _preferenceRepo = preferenceRepo;
         }
 
         /// <summary>
         /// Получить всех Клиентов.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<List<CustomerShortResponse>>> GetCustomers(CancellationToken cts)
+        public async Task<ActionResult<List<CustomerShortResponse>>> GetCustomers(CancellationToken token)
         {
-            var customers = await _repo.GetAllAsync(cts);
+            var customers = await _customerRepo.GetAllAsync(token);
             return Ok(customers.Count() > 0 ? customers.ToResponseList() : []);
         }
 
@@ -40,9 +44,9 @@ namespace PromoCodeFactory.WebHost.Controllers
         /// Получить Клиента по id.
         /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id, CancellationToken cts)
+        public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id, CancellationToken token)
         {
-            var customer = await _repo.GetByIdAsync(id, cts);
+            var customer = await _customerRepo.GetByIdAsync(id, token);
             if (customer == null) { return NoContent(); }
             return Ok(customer.ToResponse());
         }
@@ -51,10 +55,17 @@ namespace PromoCodeFactory.WebHost.Controllers
         /// Создать Клиента.
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateCustomer(CreateOrEditCustomerRequest request, CancellationToken cts)
+        public async Task<IActionResult> CreateCustomer(CreateOrEditCustomerRequest request, CancellationToken token)
         {
             var newCustomer = request.ToCustomer();
-            await _repo.CreateAsync(newCustomer, cts);
+
+            foreach (var customerPreference in newCustomer.CustomersPreferences)
+            {
+                var preferenceName = await _preferenceRepo.GetByIdAsync(customerPreference.PreferenceId, token);
+                customerPreference.Preference = new() { Name = preferenceName.Name };
+            }
+
+            await _customerRepo.CreateAsync(newCustomer, token);
             return CreatedAtAction(nameof(GetCustomer), new { id = newCustomer.Id }, newCustomer.ToResponse());
         }
 
@@ -62,10 +73,10 @@ namespace PromoCodeFactory.WebHost.Controllers
         /// Редактировать Клиента.
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditCustomer(Guid id, CreateOrEditCustomerRequest request, CancellationToken cts)
+        public async Task<IActionResult> EditCustomer(Guid id, CreateOrEditCustomerRequest request, CancellationToken token)
         {
             var updateCustomer = request.ToCustomer(id);
-            await _repo.UpdateAsync(id, updateCustomer, cts);
+            await _customerRepo.UpdateAsync(id, updateCustomer, token);
             return NoContent();
         }
 
@@ -73,9 +84,9 @@ namespace PromoCodeFactory.WebHost.Controllers
         /// Удалить Клиента.
         /// </summary>
         [HttpDelete]
-        public async Task<IActionResult> DeleteCustomer(Guid id, CancellationToken cts)
+        public async Task<IActionResult> DeleteCustomer(Guid id, CancellationToken token)
         {
-            await _repo.DeleteByIdAsync(id, cts);
+            await _customerRepo.DeleteByIdAsync(id, token);
             return NoContent();
         }
     }

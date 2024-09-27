@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PromoCodeFactory.Core.Enums;
 using PromoCodeFactory.DataAccess.Data;
-using PromoCodeFactory.WebHost.Configs;
+using PromoCodeFactory.WebHost.Configurations;
 using System;
 using System.IO;
 using System.Reflection;
@@ -28,7 +29,7 @@ namespace PromoCodeFactory.WebHost
 
             services.AddControllers();
 
-            services.AddDbContext<DatabaseContext>();
+            services.AddDbContextConfigured<DatabaseContext>(DatabaseProviders.SQLite);
 
             services.AddRepositories();
 
