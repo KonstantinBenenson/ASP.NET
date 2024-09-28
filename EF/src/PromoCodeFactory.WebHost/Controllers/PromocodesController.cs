@@ -71,7 +71,6 @@ namespace PromoCodeFactory.WebHost.Controllers
 
             foreach (var customer in customersWithPreferences)
             {
-                promo.Id = Guid.NewGuid();
                 customer.PromoCodes ??= new List<PromoCode>();
                 customer.PromoCodes.Add(promo);
 
