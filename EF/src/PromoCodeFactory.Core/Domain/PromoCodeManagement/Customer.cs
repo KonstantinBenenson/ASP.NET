@@ -12,8 +12,8 @@ namespace PromoCodeFactory.Core.Domain.PromoCodeManagement
         public string Email { get; set; }
 
         // Relations
-        public ICollection<CustomerPreference> CustomersPreferences { get; set; }
+        public IList<CustomerPreference> CustomersPreferences { get; set; } = [];
         //public ICollection<Preference> Preferences { get; set; }
-        public ICollection<PromoCode> PromoCodes { get; set; }
+        public IList<PromoCode> PromoCodes { get; set; } = [];
     }
 }

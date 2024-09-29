@@ -54,16 +54,17 @@ namespace PromoCodeFactory.DataAccess.Repositories
             await _dbContext.SaveChangesAsync(token);
         }
 
-        //public override async Task DeleteByIdAsync(Guid id, CancellationToken token)
-        //{
-        //    // Remove all related PromoCodes
-        //    if (_dbContext.PromoCodes.Where(p => p.CustomerId == id) is IQueryable<PromoCode> promoCodesToDelete)
-        //    {
-        //        _dbContext.PromoCodes.RemoveRange(promoCodesToDelete);
-        //        await _dbContext.SaveChangesAsync(token);
-        //    }
-
-        //    await base.DeleteByIdAsync(id, token);
-        //}
+        public override async Task UpdateAsync(Guid id, Customer entity, CancellationToken token)
+        {
+            var customer = await GetByIdAsync(id, token);
+            if (customer is not null)
+            {
+                customer.CustomersPreferences = new List<CustomerPreference>();
+                (customer.CustomersPreferences as List<CustomerPreference>)!.AddRange(entity.CustomersPreferences);   
+                _dbContext.Entry(customer).CurrentValues.SetValues(entity);
+                _dbContext.Entry(customer).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync(token);
+            }
+        }
     }
 }

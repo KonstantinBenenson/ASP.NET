@@ -32,6 +32,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<ActionResult<List<EmployeeShortResponse>>> GetPreferences(CancellationToken token)
         {
             var preferences = await _repo.GetAllAsync(token);
+            if (!preferences.Any()) { return NotFound(); }
             return Ok(preferences.ToResponseList());
         }
     }

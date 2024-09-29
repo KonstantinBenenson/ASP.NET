@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.WebHost.Models;
@@ -9,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using YamlDotNet.Core.Tokens;
 
 namespace PromoCodeFactory.WebHost.Controllers
 {
@@ -37,7 +35,8 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<ActionResult<List<CustomerShortResponse>>> GetCustomers(CancellationToken token)
         {
             var customers = await _customerRepo.GetAllAsync(token);
-            return Ok(customers.Count() > 0 ? customers.ToResponseList() : []);
+            if (!customers.Any()) return NotFound();
+            return Ok(customers.ToResponseList());
         }
 
         /// <summary>
@@ -47,7 +46,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id, CancellationToken token)
         {
             var customer = await _customerRepo.GetByIdAsync(id, token);
-            if (customer == null) { return NoContent(); }
+            if (customer == null) { return NotFound(); }
             return Ok(customer.ToResponse());
         }
 

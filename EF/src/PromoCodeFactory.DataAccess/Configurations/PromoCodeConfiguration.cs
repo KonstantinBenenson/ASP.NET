@@ -8,6 +8,7 @@ namespace PromoCodeFactory.DataAccess.Configurations
     {
         public void Configure(EntityTypeBuilder<PromoCode> builder)
         {
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
             builder.Property(x => x.Code).HasMaxLength(8).IsRequired();
             builder.Property(x => x.PartnerManagerId).IsRequired();
             builder.Property(x => x.PartnerName).HasMaxLength(25).IsRequired();

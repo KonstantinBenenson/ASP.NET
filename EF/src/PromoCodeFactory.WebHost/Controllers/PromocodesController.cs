@@ -42,7 +42,8 @@ namespace PromoCodeFactory.WebHost.Controllers
         [HttpGet]
         public async Task<ActionResult<List<PromoCodeShortResponse>>> GetPromocodesAsync(CancellationToken token)
         {
-            var promoCodes = await _promoCodeRepo.GetAllAsync(token);
+            var promoCodes = await _promoCodeRepo.GetAllAsync(token); 
+            if (!promoCodes.Any()) { return NotFound(); }
             return Ok(promoCodes.ToShortResponseList());
         }
 
@@ -53,28 +54,30 @@ namespace PromoCodeFactory.WebHost.Controllers
         [HttpPost]
         public async Task<IActionResult> GivePromoCodesToCustomersWithPreferenceAsync(GivePromoCodeRequest request, CancellationToken token)
         {
-            var preference = await _preferenceRepo.GetByNameAsync(request.Preference, token);
-            var employee = await _employeeRepo.GetByNameAsync(request.PartnerFirstName, token);
-
-            var promo = new PromoCode
-            {
-                Code = request.PromoCode,
-                BeginDate = DateTime.UtcNow,
-                ServiceInfo = request.ServiceInfo,
-                PartnerManagerId = employee.Id,
-                PartnerName = request.PartnerFirstName,
-                PreferenceId = preference.Id,
-            };
-
             var customersWithPreferences = await _customerRepo
                 .GetByFilterAsync(x => x.CustomersPreferences.Any(cp => cp.Preference.Name == request.Preference), token);
 
-            foreach (var customer in customersWithPreferences)
+            if (customersWithPreferences.Any())
             {
-                customer.PromoCodes ??= new List<PromoCode>();
-                customer.PromoCodes.Add(promo);
+                var preference = await _preferenceRepo.GetByNameAsync(request.Preference, token);
+                var employee = await _employeeRepo.GetByNameAsync(request.PartnerFirstName, token);
 
-                await _promoCodeRepo.CreateAsync(promo, token);
+                foreach (var customer in customersWithPreferences)
+                {
+                    customer.PromoCodes ??= new List<PromoCode>();
+                    var promo = new PromoCode
+                    {
+                        Code = request.PromoCode,
+                        BeginDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddDays(7),
+                        ServiceInfo = request.ServiceInfo,
+                        PartnerManagerId = employee.Id,
+                        PartnerName = request.PartnerFirstName,
+                        PreferenceId = preference.Id,
+                    };
+                    customer.PromoCodes.Add(promo);
+                    await _promoCodeRepo.CreateAsync(promo, token);
+                }
             }
 
             return NoContent();

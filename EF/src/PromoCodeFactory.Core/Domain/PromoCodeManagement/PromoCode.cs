@@ -20,6 +20,6 @@ namespace PromoCodeFactory.Core.Domain.PromoCodeManagement
         public Preference Preference { get; set; }
 
         //public Guid CustomerId { get; set; }
-        //public Customer Customer { get; set; }  
+        //public Customer Customer { get; set; }
     }
 }

@@ -47,7 +47,7 @@ namespace PromoCodeFactory.WebHost.Utils
                 LastName = customer.LastName,
                 Email = customer.Email,
                 Preferences = customer.CustomersPreferences.Select(x => new PreferenceResponse
-                    { Id = x.PreferenceId, Name = x.Preference.Name }).ToList(),
+                { Id = x.PreferenceId, Name = x.Preference.Name }).ToList(),
                 PromoCodes = customer.PromoCodes is not null ? customer.PromoCodes.ToShortResponseList() : []
             };
 
@@ -64,15 +64,11 @@ namespace PromoCodeFactory.WebHost.Utils
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,
-                CustomersPreferences = request.PreferenceIds.Count > 0 ? new List<CustomerPreference>() : []
             };
 
-            if (customer.CustomersPreferences is not null)
+            foreach (var guid in request.PreferenceIds)
             {
-                foreach (var guid in request.PreferenceIds)
-                {
-                    customer.CustomersPreferences.Add(new CustomerPreference { CustomerId = customerId, PreferenceId = guid });
-                }
+                customer.CustomersPreferences.Add(new CustomerPreference { CustomerId = customerId, PreferenceId = guid!.Value });
             }
 
             return customer;

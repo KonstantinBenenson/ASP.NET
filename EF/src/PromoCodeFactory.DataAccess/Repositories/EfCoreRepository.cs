@@ -27,14 +27,16 @@ namespace PromoCodeFactory.DataAccess.Repositories
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken token)
         {
-            // we use AsNoTrackingWithIdentityResolution because potentially we might return references to different instances of the same Entity
-            // (f.e. a Customer can be referenced inside of multiple Promocodes)
-            return await _dbSet.AsNoTrackingWithIdentityResolution().ToListAsync(token);
+            return await _dbSet.ToListAsync(token);
         }
 
         public virtual async Task<T> GetByIdAsync(Guid id, CancellationToken token)
         {
-            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
+            return await _dbSet.FirstOrDefaultAsync(x => x.Id == id, token);
+        }
+        public async Task<List<T>> GetByFilterAsync(Expression<Func<T, bool>> expression, CancellationToken token)
+        {
+            return await _dbSet.Where(expression).ToListAsync(token);
         }
 
         public virtual async Task CreateAsync(T entity, CancellationToken token)
@@ -51,10 +53,10 @@ namespace PromoCodeFactory.DataAccess.Repositories
 
         public virtual async Task DeleteByIdAsync(Guid id, CancellationToken token)
         {
-            var storedEntity = await TryFindEntity(id, token);
-            if (storedEntity is null) return;
+            var (result, storedEntity) = await TryFindEntity(id, token);
+            if (!result) return;
 
-            _dbSet.Entry(storedEntity).State = EntityState.Deleted;
+            _dbSet.Remove(storedEntity!);
             await _dbContext.SaveChangesAsync(token);
         }
 
@@ -63,19 +65,15 @@ namespace PromoCodeFactory.DataAccess.Repositories
         /// <summary>
         /// Tries to find an Entity with the provided Key. Otherwise throws the ArgumentException.
         /// </summary>
-        private async Task<T> TryFindEntity(Guid id, CancellationToken token)
+        private async Task<(bool Result, T? entity)> TryFindEntity(Guid id, CancellationToken token)
         {
-            if (await _dbSet.Where(e => e.Id == id).FirstOrDefaultAsync(token) is not T storedEntity)
+            var entity = await _dbSet.Where(e => e.Id == id).FirstOrDefaultAsync(token);
+            var result = entity is not null;
+            if (!result)
             {
                 _logger.LogWarning($"Entity {typeof(T)} not found", nameof(id));
-                return null;
             }
-            return storedEntity;
-        }
-
-        public async Task<List<T>> GetByFilterAsync(Expression<Func<T, bool>> expression, CancellationToken token)
-        {
-            return await _dbSet.Where(expression).ToListAsync(token);
+            return (result, entity);
         }
 
         #endregion
