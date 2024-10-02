@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["homework-unit-tests"]
+    branches: ["homework-units"]
   pull_request:
     branches: ["main"]
 
