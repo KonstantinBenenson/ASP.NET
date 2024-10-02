@@ -20,10 +20,10 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore ./tests/YourTestProject.sln
+        run: dotnet restore ./UnitTests/src/PromoCodeFactory.sln
 
       - name: Build
-        run: dotnet build ./tests/YourTestProject.sln --no-restore
+        run: dotnet build ./UnitTests/src/PromoCodeFactory.sln --no-restore
 
       - name: Run tests
-        run: dotnet test ./tests/YourTestProject.sln --no-build --no-restore --verbosity normal
+        run: dotnet test ./UnitTests/src/PromoCodeFactory.sln --no-build --no-restore --verbosity normal
