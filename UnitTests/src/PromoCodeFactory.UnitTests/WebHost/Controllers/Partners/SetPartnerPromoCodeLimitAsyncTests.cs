@@ -75,7 +75,7 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             // Arrange 
             var partnerId = partner.Id;
             var partnersController = _partnerTestsFixture.PartnersController;
-            var newLimit = 40;
+            var newLimit = 80;
             var request = new SetPartnerPromoCodeLimitRequest { Limit = newLimit, EndDate = DateTime.UtcNow.AddDays(3) };
 
             // Act
@@ -101,7 +101,7 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             var partnerId = partner.Id;
             var partnersController = _partnerTestsFixture.PartnersController;
             var initialNumberOfPromoCodes = partner.NumberIssuedPromoCodes;
-            var newLimit = 40;
+            var newLimit = 120;
             var request = new SetPartnerPromoCodeLimitRequest { Limit = newLimit, EndDate = DateTime.UtcNow.AddDays(3) };
             var partnerBeforeUpdate = await _partnerTestsFixture.PartnersRepository.GetByIdAsync(partnerId);
 
@@ -115,6 +115,4 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             promoCodesAfterUpdate.Should().Be(initialNumberOfPromoCodes);
         }
     }
-
-    //test
 }

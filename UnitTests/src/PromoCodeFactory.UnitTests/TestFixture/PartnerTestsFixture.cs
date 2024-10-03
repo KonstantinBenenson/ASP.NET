@@ -45,10 +45,7 @@ namespace PromoCodeFactory.UnitTests.TestFixture
         private async Task Seed()
         {
             PartnersRepository = ServiceProvider.GetRequiredService<IRepository<Partner>>();
-            foreach (var partner in FakeDataFactory.Partners)
-            {
-                await PartnersRepository.AddAsync(partner);
-            }
+            await DataContext.Partners.AddRangeAsync(FakeDataFactory.Partners);
             await DataContext.SaveChangesAsync();
         }
 
