@@ -27,3 +27,6 @@ jobs:
 
       - name: Run tests
         run: dotnet test ./UnitTests/src/PromoCodeFactory.sln --no-build --no-restore --verbosity normal
+
+      - name: Migrate Database
+        run: dotnet ef database update
