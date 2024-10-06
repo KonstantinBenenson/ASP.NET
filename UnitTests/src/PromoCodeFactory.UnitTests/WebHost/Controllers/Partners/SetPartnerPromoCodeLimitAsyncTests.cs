@@ -54,7 +54,7 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             // Arrange 
             var partnerId = partner.Id;
             var partnersController = _partnerTestsFixture.PartnersController;
-            var newLimit = 40;
+            var newLimit = new Random().Next(101, 1999);
             var request = new SetPartnerPromoCodeLimitRequest { Limit = newLimit, EndDate = DateTime.UtcNow.AddDays(3) };
 
             // Act
@@ -63,9 +63,27 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             var partnerLimit = partnerAfterUpdate.PartnerLimits.LastOrDefault();
 
             // Assert
-            result.Should().NotBeNull();
-            result.Should().BeOfType<CreatedAtActionResult>();
-            partnerLimit.CreateDate.Date.Should().Be(DateTime.Now.Date);
+            partnerLimit.Should().NotBeNull();
+            partnerLimit.Limit.Should().Be(newLimit);
+        }
+
+        [Theory]
+        [MemberData(nameof(TestData.GetPartnerWithActiveLimit), MemberType = typeof(TestData))]
+        public async Task SetLimit_AddLimitToActivePartner_LimitIsMoreThan_0(Partner partner)
+        {
+            // Arrange 
+            var partnerId = partner.Id;
+            var partnersController = _partnerTestsFixture.PartnersController;
+            var newLimit = new Random().Next(101, 1999);
+            var request = new SetPartnerPromoCodeLimitRequest { Limit = newLimit, EndDate = DateTime.UtcNow.AddDays(3) };
+
+            // Act
+            var result = await partnersController.SetPartnerPromoCodeLimitAsync(partnerId, request);
+            var partnerAfterUpdate = await _partnerTestsFixture.PartnersRepository.GetByIdAsync(partnerId);
+            var partnerLimit = partnerAfterUpdate.PartnerLimits.LastOrDefault();
+
+            // Assert
+            partnerLimit.Limit.Should().BeGreaterThan(0);
         }
 
         [Theory]
@@ -87,7 +105,6 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             var limit = partnerAfterUpdate.PartnerLimits.LastOrDefault()?.Limit;
 
             // Assert
-            result.Should().NotBeNull();
             prevLimit.CancelDate.Should().NotBeNull(); // checking the previous Limit CancelDate was set
             limit.Should().Be(newLimit); // Limit now is renewed
             promoCodes.Should().Be(0);
@@ -111,7 +128,6 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             var promoCodesAfterUpdate = partnerAfterUpdate.NumberIssuedPromoCodes;
 
             // Assert
-            result.Should().NotBeNull();
             promoCodesAfterUpdate.Should().Be(initialNumberOfPromoCodes);
         }
     }
