@@ -5,6 +5,7 @@ on:
     branches: ["feature/homework-docker-compose"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   publish-artifacts:
