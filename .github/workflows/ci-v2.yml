@@ -1,1 +1,35 @@
+name: ci-v2
 
+on:
+  push:
+    branches: ["homework-docker-compose"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  publish-artifacts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore ./EF/src/PromoCodeFactory.sln
+
+      - name: Publish
+        run: dotnet publish ./EF/src/PromoCodeFactory.sln --no-restore
+
+      - name: Run
+        run: dotnet publish -c Release -o ./publish --no-restore
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: ./publish
