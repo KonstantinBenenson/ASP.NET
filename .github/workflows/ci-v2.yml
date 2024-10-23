@@ -27,7 +27,7 @@ jobs:
         run: dotnet publish ./EF/src/PromoCodeFactory.sln --no-restore
 
       - name: Run
-        run: dotnet publish -c Release -o ./publish --no-restore
+        run: dotnet publish ./EF/src/PromoCodeFactory.sln -c Release -o ./publish --no-restore
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
