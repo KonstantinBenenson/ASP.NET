@@ -2,7 +2,7 @@ name: ci-v2
 
 on:
   push:
-    branches: ["homework-docker-compose"]
+    branches: ["feature/homework-docker-compose"]
   pull_request:
     branches: ["main"]
 
