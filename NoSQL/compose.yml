@@ -2,36 +2,25 @@ services:
   #Administration Db
   promocode-factory-administration-db:
     image: mongo:4.2.3
-    container_name: promocode-factory-administration-db
+    container_name: promocode-factory-mongo
     restart: always
     ports:
-      - '27018:27017'
+      - 27018:27017
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: adminpass
+      MONGO_INITDB_ROOT_USERNAME: promo
+      MONGO_INITDB_ROOT_PASSWORD: factory-admin
+      MONGO_INITDB_DATABASE_NAME: promocode-factory-administration
   #Administration Api
   promocode-factory-administration-api:
     build: src/Pcf.Administration/
     container_name: 'promocode-factory-administration-api'
     restart: always
     ports:
-      - "8091:8080"
+      - "8090:8080"
     environment:
-      - "ConnectionStrings:mongodb://admin:adminpass@localhost:27018/promocode-factory-administration?authSource=admin"
+      - "ConnectionStrings:mongodb://promo:factory-admin@localhost:27018/promocode-factory-administration"
     depends_on:
       - promocode-factory-administration-db
-  #MongoDB UI
-  mongo-express:
-    image: mongo-express:latest
-    container_name: mongo-express
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: adminpassword
-      ME_CONFIG_MONGODB_SERVER: mongodb
-    ports:
-      - "8100:8081"
-    depends_on:
-      - promocode-factory-administration-db #ReceivingFromPartner Db
 
   promocode-factory-receiving-from-partner-db:
     image: "postgres:latest"
@@ -47,7 +36,7 @@ services:
     container_name: 'promocode-factory-receiving-from-partner-api'
     restart: always
     ports:
-      - "8092:8080"
+      - "8091:8080"
     environment:
       - "ConnectionStrings:PromocodeFactoryReceivingFromPartnerDb=Host=promocode-factory-receiving-from-partner-db;Database=promocode_factory_receiving_from_partner_db;Username=postgres;Password=docker"
       - "IntegrationSettings:GivingToCustomerApiUrl=http://promocode-factory-giving-to-customer-api"
@@ -56,22 +45,24 @@ services:
       - promocode-factory-receiving-from-partner-db
 
   #GivingToCustomer Db
-  promocode-factory-giving-to-customer-db:
-    image: "postgres:latest"
-    container_name: 'promocode-factory-giving-to-customer-db'
+  promocode-factory-to-customer-db:
+    image: mongo:4.2.3
+    container_name: promocode-factory-mongo
     restart: always
     ports:
-      - 5435:5432
+      - 27018:27017
     environment:
-      - POSTGRES_PASSWORD=docker
+      MONGO_INITDB_ROOT_USERNAME: promo
+      MONGO_INITDB_ROOT_PASSWORD: factory-customer
+      MONGO_INITDB_DATABASE_NAME: promocode-factory-to-customer
   #GivingToCustomer Api
   promocode-factory-giving-to-customer-api:
     build: src/Pcf.GivingToCustomer/
     container_name: 'promocode-factory-giving-to-customer-api'
     restart: always
     ports:
-      - "8093:8080"
+      - "8092:8080"
     environment:
-      - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=promocode-factory-giving-to-customer-db;Database=promocode_factory_giving_to_customer_db;Username=postgres;Password=docker"
+      - "ConnectionStrings:ConnectionStrings:mongodb://promo:factory-customer@localhost:27018/promocode-factory-to-customer"
     depends_on:
       - promocode-factory-giving-to-customer-db
