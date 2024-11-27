@@ -20,6 +20,7 @@ namespace Pcf.GivingToCustomer.WebHost.Controllers
     {
         private readonly IRepository<Customer> _customerRepository;
         private readonly IRepository<Preference> _preferenceRepository;
+        private readonly IRepository<PromoCode> _promocodeRepository;
 
         public CustomersController(IRepository<Customer> customerRepository, 
             IRepository<Preference> preferenceRepository)
@@ -54,11 +55,13 @@ namespace Pcf.GivingToCustomer.WebHost.Controllers
         /// <param name="id">Id клиента, например <example>a6c8c6b1-4349-45b0-ab31-244740aaf0f0</example></param>
         /// <returns></returns>
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<CustomerResponse>> GetCustomerAsync(Guid id)
+        public async Task<ActionResult<CustomerResponse>> GetCustomerAsync(string id)
         {
             var customer =  await _customerRepository.GetByIdAsync(id);
+            var preferences = await _preferenceRepository.GetRangeByIdsAsync(customer.Preferences?.ToList());
+            var promoCodes = await _promocodeRepository.GetRangeByIdsAsync(customer.PromoCodes?.ToList());
 
-            var response = new CustomerResponse(customer);
+            var response = new CustomerResponse(customer, preferences, promoCodes);
 
             return Ok(response);
         }
@@ -86,8 +89,8 @@ namespace Pcf.GivingToCustomer.WebHost.Controllers
         /// </summary>
         /// <param name="id">Id клиента, например <example>a6c8c6b1-4349-45b0-ab31-244740aaf0f0</example></param>
         /// <param name="request">Данные запроса></param>
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> EditCustomersAsync(Guid id, CreateOrEditCustomerRequest request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditCustomersAsync(string id, CreateOrEditCustomerRequest request)
         {
             var customer = await _customerRepository.GetByIdAsync(id);
             
@@ -107,8 +110,8 @@ namespace Pcf.GivingToCustomer.WebHost.Controllers
         /// Удалить клиента
         /// </summary>
         /// <param name="id">Id клиента, например <example>a6c8c6b1-4349-45b0-ab31-244740aaf0f0</example></param>
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> DeleteCustomerAsync(Guid id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCustomerAsync(string id)
         {
             var customer = await _customerRepository.GetByIdAsync(id);
             
