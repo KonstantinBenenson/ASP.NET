@@ -39,6 +39,7 @@ namespace Pcf.Administration.WebHost.Controllers
                     Id = x.Id,
                     Email = x.Email,
                     FullName = x.FullName,
+                    AppliedPromoCodesCount = x.AppliedPromocodesCount
                 }).ToList();
 
             return employeesModelList;

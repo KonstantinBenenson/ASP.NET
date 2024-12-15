@@ -6,7 +6,11 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:8093",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RabbitMQ__Host": "amqp://localhost:5673",
+        "RabbitMQ__Username": "rabbit",
+        "RabbitMQ__Password": "hole",
+        "ConnectionStrings__PromocodeFactoryGivingToCustomerDb": "Host=localhost;Port=5436;Database=promocode_factory_giving_to_customer_db;Username=postgres;Password=docker"
       }
     }
   }

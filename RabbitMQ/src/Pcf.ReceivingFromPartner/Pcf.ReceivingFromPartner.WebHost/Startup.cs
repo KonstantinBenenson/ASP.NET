@@ -12,6 +12,7 @@ using Pcf.ReceivingFromPartner.DataAccess;
 using Pcf.ReceivingFromPartner.DataAccess.Repositories;
 using Pcf.ReceivingFromPartner.DataAccess.Data;
 using Pcf.ReceivingFromPartner.Integration;
+using MassTransit;
 
 namespace Pcf.ReceivingFromPartner.WebHost
 {
@@ -28,6 +29,19 @@ namespace Pcf.ReceivingFromPartner.WebHost
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMassTransit(config =>
+            {
+                config.SetKebabCaseEndpointNameFormatter();
+                config.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(new Uri(Configuration["RabbitMQ:Host"]), h =>
+                    {
+                        h.Username(Configuration["RabbitMQ:Username"]);
+                        h.Password(Configuration["RabbitMQ:Password"]);
+                    });
+                });
+            });
+
             services.AddControllers().AddMvcOptions(x =>
                 x.SuppressAsyncSuffixInActionNames = false);
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));

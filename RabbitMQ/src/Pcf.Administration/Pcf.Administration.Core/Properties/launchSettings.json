@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Pcf.Administration.Core": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "RabbitMQ__Host": "amqp://rabbit:5672"
+      }
+    }
+  }
+}

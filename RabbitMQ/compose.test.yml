@@ -1,0 +1,45 @@
+services:
+  promocode-factory-queue:
+    image: rabbitmq:4.0.2-management
+    hostname: promocode-factory-queue
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: hole
+    ports:
+      - "15673:15672" # Management UI
+      - "5673:5672" # Default RabbitMQ Port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  #GivingToCustomer Db
+  promocode-factory-giving-to-customer-db:
+    image: "postgres:latest"
+    container_name: 'promocode-factory-giving-to-customer-db'
+    restart: always
+    ports:
+      - 5436:5432
+    environment:
+      - POSTGRES_PASSWORD=docker
+
+  #Administration Db
+  promocode-factory-administration-db:
+    image: "postgres:latest"
+    container_name: 'promocode-factory-administration-db'
+    restart: always
+    ports:
+      - 5434:5432
+    environment:
+      - POSTGRES_PASSWORD=docker
+
+  #ReceivingFromPartner Db
+  promocode-factory-receiving-from-partner-db:
+    image: "postgres:latest"
+    container_name: 'promocode-factory-receiving-from-partner-db'
+    restart: always
+    ports:
+      - 5435:5432
+    environment:
+      - POSTGRES_PASSWORD=docker
+
+volumes:
+  rabbitmq_data:

@@ -24,14 +24,14 @@ namespace Pcf.GivingToCustomer.DataAccess.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            var entities = await _dataContext.Set<T>().ToListAsync();
+            var entities = await _dataContext.Set<T>().AsNoTracking().ToListAsync();
 
             return entities;
         }
 
         public async Task<T> GetByIdAsync(Guid id)
         {
-            var entity = await _dataContext.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await _dataContext.Set<T>().AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
 
             return entity;
         }

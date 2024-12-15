@@ -1,13 +1,17 @@
-﻿{
+{
   "profiles": {
     "Otus.Teaching.PromocodeFactory.WebHost": {
       "commandName": "Project",
-      "launchUrl": "swagger/index.html",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:8091",
+      "launchUrl": "swagger/index.html",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RabbitMQ__Host": "amqp://localhost:5673",
+        "RabbitMQ__Username": "rabbit",
+        "RabbitMQ__Password": "hole",
+        "ConnectionStrings__PromocodeFactoryAdministrationDb": "Host=localhost;Port=5434;Database=promocode_factory_administration_db;Username=postgres;Password=docker"
+      },
+      "applicationUrl": "http://localhost:8091"
     }
   }
 }
