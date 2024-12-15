@@ -12,6 +12,9 @@ using Pcf.GivingToCustomer.DataAccess.Data;
 using Pcf.GivingToCustomer.DataAccess;
 using Pcf.GivingToCustomer.DataAccess.Repositories;
 using Pcf.GivingToCustomer.Integration;
+using MassTransit;
+using Pcf.GivingToCustomer.Core.Services.Consumers;
+using Pcf.ReceivingFromPartner.Core.Domain.Events;
 
 namespace Pcf.GivingToCustomer.WebHost
 {
@@ -28,6 +31,27 @@ namespace Pcf.GivingToCustomer.WebHost
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMassTransit(config =>
+            {
+                config.AddConsumer<PromoCodeReceiveConsumer>();
+
+                config.SetKebabCaseEndpointNameFormatter();
+                config.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(new Uri(Configuration["RabbitMQ:Host"]), h =>
+                    {
+                        h.Username(Configuration["RabbitMQ:Username"]);
+                        h.Password(Configuration["RabbitMQ:Password"]);
+                    });
+
+                    //cfg.ReceiveEndpoint("promo-code-receive", e =>
+                    //{
+                    //    e.ConfigureConsumer<PromoCodeReceiveConsumer>(ctx);
+                    //});
+                    cfg.ConfigureEndpoints(ctx);
+                });
+            });
+
             services.AddControllers().AddMvcOptions(x =>
                 x.SuppressAsyncSuffixInActionNames = false);
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));

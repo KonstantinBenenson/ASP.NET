@@ -1,12 +1,24 @@
 services:
+  promocode-factory-queue:
+    image: rabbitmq:4.0.2-management
+    hostname: rabbit
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: hole
+    ports:
+      - "15673:15672" # Management UI
+      - "5673:5672" # Default RabbitMQ Port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
   #Administration Db
   promocode-factory-administration-db:
     image: "postgres:latest"
     container_name: 'promocode-factory-administration-db'
-    restart: always 
+    restart: always
     ports:
-      - 5433:5432
-    environment: 
+      - 5434:5432
+    environment:
       - POSTGRES_PASSWORD=docker
 
   #Administration Api
@@ -17,19 +29,22 @@ services:
     ports:
       - "8091:8080"
     environment:
-      - "ConnectionStrings:PromocodeFactoryAdministrationDb=Host=promocode-factory-administration-db;Database=promocode_factory_administration_db;Username=postgres;Password=docker"          
-    depends_on: 
+      - "ConnectionStrings:PromocodeFactoryAdministrationDb=Host=promocode-factory-administration-db;Database=promocode_factory_administration_db;Username=postgres;Password=docker"
+      - RabbitMQ__Host=amqp://rabbit:5672
+      - RabbitMQ__Username=rabbit
+      - RabbitMQ__Password=hole
+    depends_on:
       - promocode-factory-administration-db
-
+      - promocode-factory-queue
 
   #ReceivingFromPartner Db
   promocode-factory-receiving-from-partner-db:
     image: "postgres:latest"
     container_name: 'promocode-factory-receiving-from-partner-db'
-    restart: always 
+    restart: always
     ports:
-      - 5434:5432
-    environment: 
+      - 5435:5432
+    environment:
       - POSTGRES_PASSWORD=docker
 
   #ReceivingFromPartner Api
@@ -41,19 +56,23 @@ services:
       - "8092:8080"
     environment:
       - "ConnectionStrings:PromocodeFactoryReceivingFromPartnerDb=Host=promocode-factory-receiving-from-partner-db;Database=promocode_factory_receiving_from_partner_db;Username=postgres;Password=docker"
-      - "IntegrationSettings:GivingToCustomerApiUrl=http://promocode-factory-giving-to-customer-api"    
-      - "IntegrationSettings:AdministrationApiUrl=http://promocode-factory-administration-api"       
-    depends_on: 
+      - "IntegrationSettings:GivingToCustomerApiUrl=http://promocode-factory-giving-to-customer-api"
+      - "IntegrationSettings:AdministrationApiUrl=http://promocode-factory-administration-api"
+      - RabbitMQ__Host=amqp://rabbit:5672
+      - RabbitMQ__Username=rabbit
+      - RabbitMQ__Password=hole
+    depends_on:
       - promocode-factory-receiving-from-partner-db
-  
+      - promocode-factory-queue
+
   #GivingToCustomer Db
   promocode-factory-giving-to-customer-db:
     image: "postgres:latest"
     container_name: 'promocode-factory-giving-to-customer-db'
-    restart: always 
+    restart: always
     ports:
-      - 5435:5432
-    environment: 
+      - 5436:5432
+    environment:
       - POSTGRES_PASSWORD=docker
 
   #GivingToCustomer Api
@@ -64,6 +83,15 @@ services:
     ports:
       - "8093:8080"
     environment:
-      - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=promocode-factory-giving-to-customer-db;Database=promocode_factory_giving_to_customer_db;Username=postgres;Password=docker"          
-    depends_on: 
+      - "ConnectionStrings:PromocodeFactoryGivingToCustomerDb=Host=promocode-factory-giving-to-customer-db;Database=promocode_factory_giving_to_customer_db;Username=postgres;Password=docker"
+      - RabbitMQ__Host=amqp://rabbit:5672
+      - RabbitMQ__Username=rabbit
+      - RabbitMQ__Password=hole
+    depends_on:
       - promocode-factory-giving-to-customer-db
+      - promocode-factory-queue
+
+volumes:
+  rabbitmq_data:
+
+

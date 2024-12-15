@@ -8,6 +8,11 @@ using Pcf.ReceivingFromPartner.Core.Domain;
 using Pcf.ReceivingFromPartner.Core.Abstractions.Gateways;
 using Pcf.ReceivingFromPartner.WebHost.Models;
 using Pcf.ReceivingFromPartner.WebHost.Mappers;
+using MassTransit;
+using System.Threading;
+using Pcf.ReceivingFromPartner.Core.Domain.Events;
+using Microsoft.Extensions.Logging;
+using Pcf.ReceivingFromPartner.Core.Abstractions;
 
 namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 {
@@ -24,18 +29,30 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
         private readonly INotificationGateway _notificationGateway;
         private readonly IGivingPromoCodeToCustomerGateway _givingPromoCodeToCustomerGateway;
         private readonly IAdministrationGateway _administrationGateway;
+        private readonly IPublisher<GivePromocodeToCustomerEvent> _giveToCustomerPublisher;
+        private readonly IPublisher<NotifyAdminAboutPartnerManagerPromoCodeEvent> _notifyAdminPublisher;
+        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly ILogger<PartnersController> _logger;
 
         public PartnersController(IRepository<Partner> partnersRepository,
             IRepository<Preference> preferencesRepository,
             INotificationGateway notificationGateway,
             IGivingPromoCodeToCustomerGateway givingPromoCodeToCustomerGateway,
-            IAdministrationGateway administrationGateway)
+            IAdministrationGateway administrationGateway,
+            ILogger<PartnersController> logger,
+            IPublisher<GivePromocodeToCustomerEvent> giveToCustomerPublisher,
+            IPublisher<NotifyAdminAboutPartnerManagerPromoCodeEvent> notifyAdminPublisher,
+            IPublishEndpoint publishEndpoint)
         {
             _partnersRepository = partnersRepository;
             _preferencesRepository = preferencesRepository;
             _notificationGateway = notificationGateway;
             _givingPromoCodeToCustomerGateway = givingPromoCodeToCustomerGateway;
             _administrationGateway = administrationGateway;
+            _logger = logger;
+            _giveToCustomerPublisher = giveToCustomerPublisher;
+            _notifyAdminPublisher = notifyAdminPublisher;
+            this._publishEndpoint = publishEndpoint;
         }
 
         /// <summary>
@@ -286,10 +303,11 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
         /// </summary>
         /// <param name="id">Id партнера, например: <example>20d2d612-db93-4ed5-86b1-ff2413bca655</example></param>
         /// <param name="request">Данные запроса/example></param>
+        /// <param name="token"></param>
         /// <returns></returns>
         [HttpPost("{id:guid}/promocodes")]
         public async Task<IActionResult> ReceivePromoCodeFromPartnerWithPreferenceAsync(Guid id,
-            ReceivingPromoCodeRequest request)
+            ReceivingPromoCodeRequest request, CancellationToken token)
         {
             var partner = await _partnersRepository.GetByIdAsync(id);
 
@@ -332,14 +350,43 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 
             //TODO: Чтобы информация о том, что промокод был выдан парнером была отправлена
             //в микросервис рассылки клиентам нужно либо вызвать его API, либо отправить событие в очередь
-            await _givingPromoCodeToCustomerGateway.GivePromoCodeToCustomer(promoCode);
+
+            _logger.LogInformation($"Sending a message of type {nameof(GivePromocodeToCustomerEvent)} with PromoCode, having an Id '{promoCode.Id}'.");
+            await _publishEndpoint.Publish<GivePromocodeToCustomerEvent>(new()
+            {
+                PartnerId = promoCode.PartnerId,
+                BeginDate = promoCode.BeginDate.ToShortDateString(),
+                EndDate = promoCode.EndDate.ToShortDateString(),
+                PartnerManagerId = promoCode.PartnerManagerId,
+                PreferenceId = promoCode.PreferenceId,
+                PromoCode = promoCode.Code,
+                PromoCodeId = promoCode.Id,
+                ServiceInfo = promoCode.ServiceInfo
+            }, token);
+            //await _giveToCustomerPublisher.SendAsync(new()
+            //{
+            //    PartnerId = promoCode.PartnerId,
+            //    BeginDate = promoCode.BeginDate.ToShortDateString(),
+            //    EndDate = promoCode.EndDate.ToShortDateString(),
+            //    PartnerManagerId = promoCode.PartnerManagerId,
+            //    PreferenceId = promoCode.PreferenceId,
+            //    PromoCode = promoCode.Code,
+            //    PromoCodeId = promoCode.Id,
+            //    ServiceInfo = promoCode.ServiceInfo
+            //}, new Uri("rabbitmq://localhost/promo-code-receive"), token);
+            //await _givingPromoCodeToCustomerGateway.GivePromoCodeToCustomer(promoCode);
 
             //TODO: Чтобы информация о том, что промокод был выдан парнером была отправлена
             //в микросервис администрирования нужно либо вызвать его API, либо отправить событие в очередь
 
             if (request.PartnerManagerId.HasValue)
             {
-                await _administrationGateway.NotifyAdminAboutPartnerManagerPromoCode(request.PartnerManagerId.Value);
+                _logger.LogInformation($"Sending a message of type {nameof(NotifyAdminAboutPartnerManagerPromoCodeEvent)} with a PartnerManagerId '{request.PartnerManagerId}'.");
+                //await _notifyAdminPublisher.SendAsync(new(request.PartnerManagerId.Value), 
+                //    new Uri("rabbitmq://localhost/notify-admin-about-promo-code"), token);
+                var value = request.PartnerManagerId.Value;
+                await _publishEndpoint.Publish<NotifyAdminAboutPartnerManagerPromoCodeEvent>(new(value), token);
+                //await _administrationGateway.NotifyAdminAboutPartnerManagerPromoCode(request.PartnerManagerId.Value);
             }
 
             return CreatedAtAction(nameof(GetPartnerPromoCodeAsync),
