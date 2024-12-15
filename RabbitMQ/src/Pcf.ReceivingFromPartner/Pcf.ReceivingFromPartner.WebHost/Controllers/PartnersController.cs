@@ -10,9 +10,8 @@ using Pcf.ReceivingFromPartner.WebHost.Models;
 using Pcf.ReceivingFromPartner.WebHost.Mappers;
 using MassTransit;
 using System.Threading;
-using Pcf.ReceivingFromPartner.Core.Domain.Events;
 using Microsoft.Extensions.Logging;
-using Pcf.ReceivingFromPartner.Core.Abstractions;
+using Pcf.Common.EventModels;
 
 namespace Pcf.ReceivingFromPartner.WebHost.Controllers
 {
@@ -29,8 +28,6 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
         private readonly INotificationGateway _notificationGateway;
         private readonly IGivingPromoCodeToCustomerGateway _givingPromoCodeToCustomerGateway;
         private readonly IAdministrationGateway _administrationGateway;
-        private readonly IPublisher<GivePromocodeToCustomerEvent> _giveToCustomerPublisher;
-        private readonly IPublisher<NotifyAdminAboutPartnerManagerPromoCodeEvent> _notifyAdminPublisher;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger<PartnersController> _logger;
 
@@ -40,8 +37,6 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
             IGivingPromoCodeToCustomerGateway givingPromoCodeToCustomerGateway,
             IAdministrationGateway administrationGateway,
             ILogger<PartnersController> logger,
-            IPublisher<GivePromocodeToCustomerEvent> giveToCustomerPublisher,
-            IPublisher<NotifyAdminAboutPartnerManagerPromoCodeEvent> notifyAdminPublisher,
             IPublishEndpoint publishEndpoint)
         {
             _partnersRepository = partnersRepository;
@@ -50,9 +45,7 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
             _givingPromoCodeToCustomerGateway = givingPromoCodeToCustomerGateway;
             _administrationGateway = administrationGateway;
             _logger = logger;
-            _giveToCustomerPublisher = giveToCustomerPublisher;
-            _notifyAdminPublisher = notifyAdminPublisher;
-            this._publishEndpoint = publishEndpoint;
+            _publishEndpoint = publishEndpoint;
         }
 
         /// <summary>
@@ -363,18 +356,6 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
                 PromoCodeId = promoCode.Id,
                 ServiceInfo = promoCode.ServiceInfo
             }, token);
-            //await _giveToCustomerPublisher.SendAsync(new()
-            //{
-            //    PartnerId = promoCode.PartnerId,
-            //    BeginDate = promoCode.BeginDate.ToShortDateString(),
-            //    EndDate = promoCode.EndDate.ToShortDateString(),
-            //    PartnerManagerId = promoCode.PartnerManagerId,
-            //    PreferenceId = promoCode.PreferenceId,
-            //    PromoCode = promoCode.Code,
-            //    PromoCodeId = promoCode.Id,
-            //    ServiceInfo = promoCode.ServiceInfo
-            //}, new Uri("rabbitmq://localhost/promo-code-receive"), token);
-            //await _givingPromoCodeToCustomerGateway.GivePromoCodeToCustomer(promoCode);
 
             //TODO: Чтобы информация о том, что промокод был выдан парнером была отправлена
             //в микросервис администрирования нужно либо вызвать его API, либо отправить событие в очередь
@@ -382,10 +363,9 @@ namespace Pcf.ReceivingFromPartner.WebHost.Controllers
             if (request.PartnerManagerId.HasValue)
             {
                 _logger.LogInformation($"Sending a message of type {nameof(NotifyAdminAboutPartnerManagerPromoCodeEvent)} with a PartnerManagerId '{request.PartnerManagerId}'.");
-                //await _notifyAdminPublisher.SendAsync(new(request.PartnerManagerId.Value), 
-                //    new Uri("rabbitmq://localhost/notify-admin-about-promo-code"), token);
                 var value = request.PartnerManagerId.Value;
                 await _publishEndpoint.Publish<NotifyAdminAboutPartnerManagerPromoCodeEvent>(new(value), token);
+                
                 //await _administrationGateway.NotifyAdminAboutPartnerManagerPromoCode(request.PartnerManagerId.Value);
             }
 

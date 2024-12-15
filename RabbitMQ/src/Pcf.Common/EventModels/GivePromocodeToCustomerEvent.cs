@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Pcf.ReceivingFromPartner.Core.Domain.Events;
+﻿namespace Pcf.Common.EventModels;
 
 public class GivePromocodeToCustomerEvent
 {

@@ -30,7 +30,7 @@ namespace Pcf.Administration.WebHost
         {
             services.AddMassTransit(config =>
             {
-                //config.AddConsumer<NotifyAdminAboutPromoCodeConsumer>();
+                config.AddConsumer<NotifyAdminAboutPromoCodeConsumer>();
 
                 config.SetKebabCaseEndpointNameFormatter();
                 config.UsingRabbitMq((ctx, cfg) =>
@@ -41,10 +41,11 @@ namespace Pcf.Administration.WebHost
                         h.Password(Configuration["RabbitMQ:Password"]);
                     });
 
-                    cfg.ReceiveEndpoint("notify-admin-about-promo-code", e =>
-                    {
-                        e.Consumer<NotifyAdminAboutPromoCodeConsumer>(ctx);
-                    });
+                    //cfg.ReceiveEndpoint("notify-admin-about-promo-code", e =>
+                    //{
+                    //    e.Consumer<NotifyAdminAboutPromoCodeConsumer>(ctx);
+                    //});
+                    cfg.ConfigureEndpoints(ctx);
                 });
             });
 

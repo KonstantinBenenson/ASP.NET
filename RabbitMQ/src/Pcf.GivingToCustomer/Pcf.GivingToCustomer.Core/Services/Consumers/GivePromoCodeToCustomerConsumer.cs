@@ -1,8 +1,8 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
+using Pcf.Common.EventModels;
 using Pcf.GivingToCustomer.Core.Abstractions.Repositories;
 using Pcf.GivingToCustomer.Core.Domain;
-using Pcf.ReceivingFromPartner.Core.Domain.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +10,15 @@ using System.Threading.Tasks;
 
 namespace Pcf.GivingToCustomer.Core.Services.Consumers;
 
-public class PromoCodeReceiveConsumer : IConsumer<GivePromocodeToCustomerEvent>
+public class GivePromoCodeToCustomerConsumer : IConsumer<GivePromocodeToCustomerEvent>
 {
     private readonly IRepository<PromoCode> _promoCodesRepository;
     private readonly IRepository<Preference> _preferencesRepository; 
     private readonly IRepository<Customer> _customersRepository;
 
-    private readonly ILogger<PromoCodeReceiveConsumer> _logger;
+    private readonly ILogger<GivePromoCodeToCustomerConsumer> _logger;
 
-    public PromoCodeReceiveConsumer(IRepository<Preference> preferencesRepository, IRepository<Customer> customersRepository, IRepository<PromoCode> promoCodesRepository, ILogger<PromoCodeReceiveConsumer> logger)
+    public GivePromoCodeToCustomerConsumer(IRepository<Preference> preferencesRepository, IRepository<Customer> customersRepository, IRepository<PromoCode> promoCodesRepository, ILogger<GivePromoCodeToCustomerConsumer> logger)
     {
         _preferencesRepository = preferencesRepository;
         _customersRepository = customersRepository;

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Pcf.Administration.Core.Abstractions.Repositories;
 using Pcf.Administration.Core.Domain.Administration;
-using Pcf.Administration.Core.Domain.Events;
+using Pcf.Common.EventModels;
 using System;
 using System.Threading.Tasks;
 

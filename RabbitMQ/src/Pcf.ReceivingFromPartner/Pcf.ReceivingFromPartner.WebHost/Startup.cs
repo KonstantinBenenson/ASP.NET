@@ -13,9 +13,6 @@ using Pcf.ReceivingFromPartner.DataAccess.Repositories;
 using Pcf.ReceivingFromPartner.DataAccess.Data;
 using Pcf.ReceivingFromPartner.Integration;
 using MassTransit;
-using Pcf.ReceivingFromPartner.Core.Domain.Events;
-using Pcf.ReceivingFromPartner.Core.Abstractions;
-using Pcf.ReceivingFromPartner.Core.Services.Producers;
 
 namespace Pcf.ReceivingFromPartner.WebHost
 {
@@ -44,8 +41,6 @@ namespace Pcf.ReceivingFromPartner.WebHost
                     });
                 });
             });
-
-            services.AddScoped(typeof(IPublisher<>), typeof(PublisherService<>));
 
             services.AddControllers().AddMvcOptions(x =>
                 x.SuppressAsyncSuffixInActionNames = false);

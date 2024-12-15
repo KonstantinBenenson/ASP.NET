@@ -14,7 +14,6 @@ using Pcf.GivingToCustomer.DataAccess.Repositories;
 using Pcf.GivingToCustomer.Integration;
 using MassTransit;
 using Pcf.GivingToCustomer.Core.Services.Consumers;
-using Pcf.ReceivingFromPartner.Core.Domain.Events;
 
 namespace Pcf.GivingToCustomer.WebHost
 {
@@ -33,7 +32,7 @@ namespace Pcf.GivingToCustomer.WebHost
         {
             services.AddMassTransit(config =>
             {
-                config.AddConsumer<PromoCodeReceiveConsumer>();
+                config.AddConsumer<GivePromoCodeToCustomerConsumer>();
 
                 config.SetKebabCaseEndpointNameFormatter();
                 config.UsingRabbitMq((ctx, cfg) =>

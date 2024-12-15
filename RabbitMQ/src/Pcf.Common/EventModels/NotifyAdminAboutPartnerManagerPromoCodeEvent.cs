@@ -1,5 +1,2 @@
-﻿using System;
-
-namespace Pcf.Administration.Core.Domain.Events;
-
+﻿namespace Pcf.Common.EventModels;
 public record NotifyAdminAboutPartnerManagerPromoCodeEvent(Guid PartnerManagerId);
