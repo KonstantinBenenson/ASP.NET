@@ -11,7 +11,7 @@ const MainPage = () => {
     const ac = new AbortController();
     try {
       setIsLoading(true);
-      const res = await axios.get("http://localhost:5234/WeatherForecast", {
+      const res = await axios.get("https://localhost:7122/WeatherForecast", {
         signal: ac.signal,
       });
       console.log("Fetch result", res);

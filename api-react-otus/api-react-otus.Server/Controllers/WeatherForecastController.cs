@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace react_otus_api.Controllers
+namespace api_react_otus.Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]

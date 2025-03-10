@@ -1,4 +1,4 @@
-namespace react_otus_api
+namespace api_react_otus.Server
 {
     public class WeatherForecast
     {
