@@ -1,0 +1,6 @@
+@api_react_otus.Server_HostAddress = http://localhost:5236
+
+GET {{api_react_otus.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
