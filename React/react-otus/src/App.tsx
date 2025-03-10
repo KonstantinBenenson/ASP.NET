@@ -1,10 +1,10 @@
 import "./App.css";
-import DogBreedsProvider from "./components/DogBreedsProvider";
+import MainPage from "./MainPage";
 
 function App() {
   return (
     <>
-      <DogBreedsProvider />
+      <MainPage />
     </>
   );
 }
